@@ -11,14 +11,28 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('roles', function (Blueprint $table) {
+            $table->id();
+            $table->string('name', 50)->unique();
+            $table->dateTime('created_at');
+            $table->dateTime('updated_at');
+        });
+
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->foreignId('role_id')->constrained('roles')->restrictOnDelete();
+
+            // Storage tracked directly per user
+            $table->unsignedBigInteger('storage_limit')->default(5368709120); // 5GB
+            $table->unsignedBigInteger('storage_used')->default(0);
+
             $table->rememberToken();
-            $table->timestamps();
+            $table->dateTime('created_at');
+            $table->dateTime('updated_at');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
@@ -42,6 +56,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('role');
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
