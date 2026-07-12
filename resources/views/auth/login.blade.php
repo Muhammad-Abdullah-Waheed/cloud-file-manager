@@ -2,33 +2,22 @@
 
 @section('content')
 
-<div class="min-h-[85vh] flex items-center justify-center bg-base-200 px-4 pt-5">
+<div class="min-h-[85vh] flex items-center justify-center bg-base-200 px-4">
     <div class="card w-full max-w-md bg-base-100 shadow-xl">
         <div class="card-body">
 
             <h2 class="card-title text-2xl font-bold mb-2">
-                {{ __('auth.register_title') }}
+                {{ __('auth.login_title') }}
             </h2>
 
-            <form method="POST" action="{{ route('register') }}">
-                @csrf
-
-                {{-- Name --}}
-                <div class="form-control mb-3">
-                    <label class="label">
-                        <span class="label-text">{{ __('auth.name') }}</span>
-                    </label>
-                    <input type="text"
-                           name="name"
-                           value="{{ old('name') }}"
-                           placeholder="{{ __('auth.name_placeholder') }}"
-                           class="input input-bordered w-full @error('name') input-error @enderror" />
-                    @error('name')
-                        <label class="label">
-                            <span class="label-text-alt text-error">{{ $message }}</span>
-                        </label>
-                    @enderror
+            @if(session('status'))
+                <div class="alert alert-success mb-3">
+                    {{ session('status') }}
                 </div>
+            @endif
+
+            <form method="POST" action="{{ route('login') }}">
+                @csrf
 
                 {{-- Email --}}
                 <div class="form-control mb-3">
@@ -37,7 +26,7 @@
                     </label>
                     <input type="email"
                            name="email"
-                           dir="rtl"
+                           dir="ltr"
                            value="{{ old('email') }}"
                            placeholder="{{ __('auth.email_placeholder') }}"
                            class="input input-bordered w-full @error('email') input-error @enderror" />
@@ -55,6 +44,7 @@
                     </label>
                     <input type="password"
                            name="password"
+                           dir="ltr"
                            placeholder="{{ __('auth.password_placeholder') }}"
                            class="input input-bordered w-full @error('password') input-error @enderror" />
                     @error('password')
@@ -64,28 +54,23 @@
                     @enderror
                 </div>
 
-                {{-- Confirm Password --}}
+                {{-- Remember Me --}}
                 <div class="form-control mb-5">
-                    <label class="label">
-                        <span class="label-text">{{ __('auth.confirm_password') }}</span>
+                    <label class="label cursor-pointer justify-start gap-3">
+                        <input type="checkbox" name="remember" class="checkbox checkbox-primary" />
+                        <span class="label-text">{{ __('auth.remember_me') }}</span>
                     </label>
-                    <input type="password"
-                           name="password_confirmation"
-                           placeholder="{{ __('auth.confirm_password_placeholder') }}"
-                           class="input input-bordered w-full" />
                 </div>
 
                 <button type="submit" class="btn btn-primary w-full">
-                    {{ __('auth.register_btn') }}
+                    {{ __('auth.login_btn') }}
                 </button>
 
                 <p class="text-center mt-4 text-sm">
-                    {{ __('auth.already_have_account') }}
-                    @if(Route::has('login'))
-                        <a href="{{ route('login') }}" class="link link-primary">
-                            {{ __('auth.login_link') }}
-                        </a>
-                    @endif
+                    {{ __('auth.no_account') }}
+                    <a href="{{ route('register') }}" class="link link-primary">
+                        {{ __('auth.register_link') }}
+                    </a>
                 </p>
 
             </form>

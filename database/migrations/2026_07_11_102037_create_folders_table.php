@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('slug', 255);
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('parent_id')->nullable()->constrained('folders')->restrictOnDelete();
-            $table->softDeletes();
+            $table->dateTime('deleted_at')->nullable();
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
 

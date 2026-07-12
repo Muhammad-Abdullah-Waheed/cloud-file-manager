@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('path',2048);
             $table->unsignedInteger('size');
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->unsignedInteger('version_number');
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
         });

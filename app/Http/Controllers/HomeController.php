@@ -2,19 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Features\RegisterFeature;
-use App\Http\Requests\RegisterRequest;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
-
-class RegisterUserController extends Controller
+class HomeController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
+        return view('home');
     }
 
     /**
@@ -22,26 +19,21 @@ class RegisterUserController extends Controller
      */
     public function create()
     {
-        return view('auth.register');
+        //
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(RegisterRequest $request, RegisterFeature $registerFeature)
+    public function store(Request $request)
     {
-        $validatedRequest = $request->validated();
-        $user = $registerFeature->handle($validatedRequest);
-
-        Auth::login($user);
-
-        return redirect()->intended(route('home'));
+        //
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(User $user)
+    public function show(string $id)
     {
         //
     }
@@ -49,7 +41,7 @@ class RegisterUserController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(User $user)
+    public function edit(string $id)
     {
         //
     }
@@ -57,7 +49,7 @@ class RegisterUserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, string $id)
     {
         //
     }
@@ -65,7 +57,7 @@ class RegisterUserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
+    public function destroy(string $id)
     {
         //
     }
