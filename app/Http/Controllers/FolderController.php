@@ -1,0 +1,44 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Folder;
+use Illuminate\Http\Request;
+use App\Http\Requests\CreateFolderRequest;
+use App\Http\Requests\RenameFolderRequest;
+use App\Features\CreateFolderFeature;
+use App\Features\RenameFolderFeature;
+use App\Features\DeleteFolderFeature;
+
+class FolderController extends Controller
+{
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(CreateFolderRequest $request, CreateFolderFeature $feature)
+    {
+        $this->authorize('create', Folder::class);
+        $folder = $feature->handle($request->validated(), auth()->id());
+        return redirect()->back()->with('success', __('folder.created'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(RenameFolderRequest $request, Folder $folder, RenameFolderFeature $feature)
+    {
+        $this->authorize('update', $folder);
+        $feature->handle($folder->id, $request->validated()['name']);
+        return redirect()->back()->with('success', __('folder.renamed'));
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Folder $folder, DeleteFolderFeature $feature)
+    {
+        $this->authorize('delete', $folder);
+        $feature->handle($folder->id);
+        return redirect()->back()->with('success', __('folder.deleted'));
+    }
+}

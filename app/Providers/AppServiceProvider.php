@@ -12,6 +12,11 @@ use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Repositories\UserRepository;
 use App\Repositories\Interfaces\RoleRepositoryInterface;
 use App\Repositories\RoleRepository;
+use App\Repositories\Interfaces\FolderRepositoryInterface;
+use App\Repositories\FolderRepository;
+use App\Models\Folder;
+use App\Policies\FolderPolicy;
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
         $this->app->bind(RoleRepositoryInterface::class, RoleRepository::class);
-
+        $this->app->bind(FolderRepositoryInterface::class, FolderRepository::class);
     }
 
     /**
@@ -30,6 +35,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::policy(Folder::class, FolderPolicy::class);
+        
+
         $this->configureDefaults();
         Model::unguard();
         Model::shouldBeStrict();
