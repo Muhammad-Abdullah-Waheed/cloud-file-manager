@@ -36,7 +36,7 @@ class LoginUserController extends Controller
                 ->withErrors(['email' => __('auth.failed')]);
         }
         $request->session()->regenerate(); 
-        return redirect()->intended(route('home'));
+        return redirect()->intended(route('dashboard'));
     }
 
     public function logout(Request $request)
