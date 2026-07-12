@@ -8,13 +8,30 @@
     <aside class="w-64 bg-base-200 border-e border-base-300 flex-col p-4 gap-2 hidden md:flex">
 
         <button onclick="document.getElementById('modal_new_folder').showModal()"
-                class="btn btn-primary w-full gap-2 mb-4">
+                class="btn btn-primary w-full gap-2 mb-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
                  viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
             </svg>
             {{ __('dashboard.new') }}
         </button>
+
+        <label for="file_upload_input" class="btn btn-outline w-full gap-2 mb-4 cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            {{ __('file.upload') }}
+        </label>
+
+        {{-- Hidden upload form --}}
+        <form method="POST" action="{{ route('files.store') }}" enctype="multipart/form-data" id="upload_form">
+            @csrf
+            <input type="hidden" name="parent_id" value="">
+            <input type="file" id="file_upload_input" name="file" class="hidden"
+                   onchange="document.getElementById('upload_form').submit()" />
+        </form>
 
         <a href="{{ route('dashboard') }}"
            class="flex items-center gap-3 px-3 py-2 rounded-lg bg-base-300 font-medium">
@@ -44,10 +61,22 @@
             {{ __('dashboard.trash') }}
         </a>
 
+        {{-- Storage bar — wired to real data --}}
         <div class="mt-auto">
+            @php
+                $user         = auth()->user();
+                $used         = $user->storage_used;
+                $limit        = $user->storage_limit;
+                $percent      = $limit > 0 ? round(($used / $limit) * 100) : 0;
+                $usedGB       = number_format($used / 1073741824, 2);
+                $limitGB      = number_format($limit / 1073741824, 1);
+            @endphp
             <div class="text-xs text-base-content/60 mb-1">{{ __('dashboard.storage') }}</div>
-            <progress class="progress progress-primary w-full" value="0" max="100"></progress>
-            <div class="text-xs text-base-content/60 mt-1">0 GB {{ __('dashboard.of') }} 5 GB</div>
+            <progress class="progress progress-primary w-full"
+                      value="{{ $percent }}" max="100"></progress>
+            <div class="text-xs text-base-content/60 mt-1">
+                {{ $usedGB }} GB {{ __('dashboard.of') }} {{ $limitGB }} GB
+            </div>
         </div>
 
     </aside>
@@ -55,47 +84,44 @@
     {{-- Main content --}}
     <main class="flex-1 overflow-y-auto p-6">
 
-        {{-- Flash messages — auto dismiss after 5s --}}
+        {{-- Flash messages --}}
         @if(session('success'))
-            <div id="flash-success" class="alert alert-success mb-4 transition-opacity duration-500">
+            <div class="alert alert-success mb-4">
                 <span>{{ session('success') }}</span>
             </div>
         @endif
 
         @if(session('error'))
-            <div id="flash-error" class="alert alert-error mb-4 transition-opacity duration-500">
+            <div class="alert alert-error mb-4">
                 <span>{{ session('error') }}</span>
             </div>
         @endif
 
+        {{-- Breadcrumb --}}
         <div class="text-sm breadcrumbs mb-4">
             <ul>
                 <li>{{ __('dashboard.my_drive') }}</li>
             </ul>
         </div>
 
+        {{-- Folders --}}
         @if($folders->isNotEmpty())
-
             <h2 class="text-sm font-semibold text-base-content/60 uppercase tracking-wide mb-3">
                 {{ __('folder.folders') }}
             </h2>
-
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
                 @foreach($folders as $folder)
                     <div class="group relative flex flex-col items-center p-3 rounded-xl
                                 hover:bg-base-200 cursor-pointer transition-colors">
-
                         <svg xmlns="http://www.w3.org/2000/svg"
                              class="h-12 w-12 text-primary mb-2" fill="currentColor"
                              viewBox="0 0 24 24">
                             <path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2
                                      2H5a2 2 0 01-2-2V7z" />
                         </svg>
-
                         <span class="text-xs text-center truncate w-full">
                             {{ $folder->name }}
                         </span>
-
                         <div class="dropdown dropdown-end absolute top-1 end-1
                                     opacity-0 group-hover:opacity-100 transition-opacity">
                             <button tabindex="0" class="btn btn-ghost btn-xs">
@@ -111,25 +137,78 @@
                                        z-10 w-40 p-1 shadow-lg border border-base-200">
                                 <li>
                                     <button onclick="openRenameModal({{ $folder->id }}, '{{ addslashes($folder->name) }}')"
-                                            class="text-sm">
-                                        {{ __('folder.rename') }}
-                                    </button>
+                                            class="text-sm">{{ __('folder.rename') }}</button>
                                 </li>
                                 <li>
-                                    <button onclick="openDeleteModal({{ $folder->id }}, '{{ addslashes($folder->name) }}')"
-                                            class="text-sm text-error">
-                                        {{ __('folder.delete') }}
-                                    </button>
+                                    <button onclick="openFolderDeleteModal({{ $folder->id }}, '{{ addslashes($folder->name) }}')"
+                                            class="text-sm text-error">{{ __('folder.delete') }}</button>
                                 </li>
                             </ul>
                         </div>
-
                     </div>
                 @endforeach
             </div>
+        @endif
 
-        @else
+        {{-- Files --}}
+        @if($files->isNotEmpty())
+            <h2 class="text-sm font-semibold text-base-content/60 uppercase tracking-wide mb-3">
+                {{ __('file.files') }}
+            </h2>
+            <div class="overflow-x-auto rounded-xl border border-base-200">
+                <table class="table table-zebra w-full">
+                    <thead>
+                        <tr>
+                            <th>{{ __('file.name') }}</th>
+                            <th>{{ __('file.type') }}</th>
+                            <th>{{ __('file.size') }}</th>
+                            <th>{{ __('file.uploaded_at') }}</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($files as $file)
+                            <tr>
+                                <td class="flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-base-content/40"
+                                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                    </svg>
+                                    {{ $file->name }}
+                                </td>
+                                <td class="text-sm text-base-content/60">{{ $file->mime_type }}</td>
+                                <td class="text-sm text-base-content/60">
+                                    @if($file->currentVersion)
+                                        {{ number_format($file->currentVersion->size / 1024, 1) }} KB
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                                <td class="text-sm text-base-content/60">
+                                    {{ $file->created_at->diffForHumans() }}
+                                </td>
+                                <td>
+                                    <div class="flex items-center gap-1 justify-end">
+                                        <a href="{{ route('files.download', $file) }}"
+                                           class="btn btn-ghost btn-xs">
+                                            {{ __('file.download') }}
+                                        </a>
+                                        <button onclick="openFileDeleteModal({{ $file->id }}, '{{ addslashes($file->name) }}')"
+                                                class="btn btn-ghost btn-xs text-error">
+                                            {{ __('file.delete') }}
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
 
+        {{-- Empty state --}}
+        @if($folders->isEmpty() && $files->isEmpty())
             <div class="flex flex-col items-center justify-center h-96 text-base-content/40">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 mb-4" fill="none"
                      viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
@@ -139,7 +218,6 @@
                 <p class="text-lg font-medium">{{ __('dashboard.empty_title') }}</p>
                 <p class="text-sm mt-1">{{ __('dashboard.empty_subtitle') }}</p>
             </div>
-
         @endif
 
     </main>
@@ -157,12 +235,7 @@
                     <span class="label-text">{{ __('folder.folder_name') }}</span>
                 </label>
                 <input type="text" name="name" autofocus
-                       value="{{ old('name') }}"
-                       class="input input-bordered w-full @error('slug') input-error @enderror"
-                       required />
-                @error('slug')
-                    <p style="color: red;">{{ __('folder.name_taken') }}</p>
-                @enderror
+                       class="input input-bordered w-full" required />
             </div>
             <div class="modal-action">
                 <button type="button"
@@ -175,7 +248,7 @@
     <form method="dialog" class="modal-backdrop"><button>close</button></form>
 </dialog>
 
-{{-- Rename Modal --}}
+{{-- Rename Folder Modal --}}
 <dialog id="modal_rename_folder" class="modal">
     <div class="modal-box">
         <h3 class="font-bold text-lg mb-4">{{ __('folder.rename') }}</h3>
@@ -187,11 +260,7 @@
                     <span class="label-text">{{ __('folder.folder_name') }}</span>
                 </label>
                 <input type="text" name="name" id="rename_input"
-                       class="input input-bordered w-full @error('slug') input-error @enderror"
-                       required />
-                @error('slug')
-                    <p style="color: red;">{{ __('folder.name_taken') }}</p>
-                @enderror
+                       class="input input-bordered w-full" required />
             </div>
             <div class="modal-action">
                 <button type="button"
@@ -204,14 +273,14 @@
     <form method="dialog" class="modal-backdrop"><button>close</button></form>
 </dialog>
 
-{{-- Delete Modal --}}
+{{-- Delete Folder Modal --}}
 <dialog id="modal_delete_folder" class="modal">
     <div class="modal-box">
         <h3 class="font-bold text-lg mb-2">{{ __('folder.delete') }}</h3>
         <p class="text-base-content/70 mb-4">
             {{ __('folder.delete_confirm') }} <strong id="delete_folder_name"></strong>?
         </p>
-        <form method="POST" id="delete_form">
+        <form method="POST" id="delete_folder_form">
             @csrf
             @method('DELETE')
             <div class="modal-action">
@@ -225,41 +294,43 @@
     <form method="dialog" class="modal-backdrop"><button>close</button></form>
 </dialog>
 
+{{-- Delete File Modal --}}
+<dialog id="modal_delete_file" class="modal">
+    <div class="modal-box">
+        <h3 class="font-bold text-lg mb-2">{{ __('file.delete') }}</h3>
+        <p class="text-base-content/70 mb-4">
+            {{ __('file.delete_confirm') }} <strong id="delete_file_name"></strong>?
+        </p>
+        <form method="POST" id="delete_file_form">
+            @csrf
+            @method('DELETE')
+            <div class="modal-action">
+                <button type="button"
+                        onclick="document.getElementById('modal_delete_file').close()"
+                        class="btn btn-ghost">{{ __('file.cancel') }}</button>
+                <button type="submit" class="btn btn-error">{{ __('file.delete') }}</button>
+            </div>
+        </form>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+</dialog>
+
 <script>
-    // Auto-dismiss flash messages after 5 seconds
-    document.addEventListener('DOMContentLoaded', function () {
-        ['flash-success', 'flash-error'].forEach(function (id) {
-            var el = document.getElementById(id);
-            if (el) {
-                setTimeout(function () {
-                    el.style.opacity = '0';
-                    setTimeout(function () { el.remove(); }, 500);
-                }, 5000);
-            }
-        });
-
-        // Reopen new folder modal if it had a validation error
-        @if($errors->has('slug') && !old('_method'))
-            document.getElementById('modal_new_folder').showModal();
-        @endif
-
-        // Reopen rename modal if it had a validation error
-        @if($errors->has('slug') && old('_method') === 'PATCH')
-            document.getElementById('modal_rename_folder').showModal();
-        @endif
-    });
-
-    function openRenameModal(id, name) {
-        document.getElementById('rename_form').action = '/folders/' + id;
-        document.getElementById('rename_input').value = name;
-        document.getElementById('modal_rename_folder').showModal();
-    }
-
-    function openDeleteModal(id, name) {
-        document.getElementById('delete_form').action = '/folders/' + id;
-        document.getElementById('delete_folder_name').textContent = name;
-        document.getElementById('modal_delete_folder').showModal();
-    }
+function openRenameModal(id, name) {
+    document.getElementById('rename_form').action = '/folders/' + id;
+    document.getElementById('rename_input').value = name;
+    document.getElementById('modal_rename_folder').showModal();
+}
+function openFolderDeleteModal(id, name) {
+    document.getElementById('delete_folder_form').action = '/folders/' + id;
+    document.getElementById('delete_folder_name').textContent = name;
+    document.getElementById('modal_delete_folder').showModal();
+}
+function openFileDeleteModal(id, name) {
+    document.getElementById('delete_file_form').action = '/files/' + id;
+    document.getElementById('delete_file_name').textContent = name;
+    document.getElementById('modal_delete_file').showModal();
+}
 </script>
 
 @endsection

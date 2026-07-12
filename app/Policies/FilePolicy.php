@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Policies;
+
+use App\Models\File;
+use App\Models\User;
+use Illuminate\Auth\Access\Response;
+
+class FilePolicy
+{
+    public function view(User $user, File $file): bool
+    {
+        return $user->id === $file->user_id;
+    }
+
+    public function create(User $user): bool
+    {
+        return true;
+    }
+
+    public function delete(User $user, File $file): bool
+    {
+        return $user->id === $file->user_id;
+    }
+
+    public function download(User $user, File $file): bool
+    {
+        return $user->id === $file->user_id;
+    }
+}

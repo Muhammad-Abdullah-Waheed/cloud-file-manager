@@ -17,6 +17,12 @@ use App\Repositories\FolderRepository;
 use App\Models\Folder;
 use App\Policies\FolderPolicy;
 use Illuminate\Support\Facades\Gate;
+use App\Repositories\Interfaces\FileRepositoryInterface;
+use App\Repositories\FileRepository;
+use App\Repositories\Interfaces\FileVersionRepositoryInterface;
+use App\Repositories\FileVersionRepository;
+use App\Models\File;
+use App\Policies\FilePolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,6 +34,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
         $this->app->bind(RoleRepositoryInterface::class, RoleRepository::class);
         $this->app->bind(FolderRepositoryInterface::class, FolderRepository::class);
+        $this->app->bind(FileRepositoryInterface::class, FileRepository::class);
+        $this->app->bind(FileVersionRepositoryInterface::class, FileVersionRepository::class);
     }
 
     /**
@@ -36,7 +44,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::policy(Folder::class, FolderPolicy::class);
-        
+        Gate::policy(File::class, FilePolicy::class);
+
 
         $this->configureDefaults();
         Model::unguard();

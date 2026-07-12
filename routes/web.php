@@ -7,6 +7,7 @@ use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\LoginUserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FolderController;
+use App\Http\Controllers\FileController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -29,4 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/folders', [FolderController::class, 'store'])->name('folders.store');
     Route::patch('/folders/{folder}', [FolderController::class, 'update'])->name('folders.update');
     Route::delete('/folders/{folder}', [FolderController::class, 'destroy'])->name('folders.destroy');
+    Route::post('/files', [FileController::class, 'store'])->name('files.store');
+    Route::get('/files/{file}/download', [FileController::class, 'show'])->name('files.download');
+    Route::delete('/files/{file}', [FileController::class, 'destroy'])->name('files.destroy');
 });

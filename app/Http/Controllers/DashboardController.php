@@ -3,13 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Features\GetRootFoldersFeature;
+use App\Features\GetRootFilesFeature;
 
 class DashboardController extends Controller
 {
-    public function index(GetRootFoldersFeature $feature)
+    public function index(GetRootFoldersFeature $foldersFeature, GetRootFilesFeature $filesFeature)
     {
-        $folders = $feature->handle(auth()->id());
+        $folders = $foldersFeature->handle(auth()->id());
+        $files = $filesFeature->handle(auth()->id());
 
-        return view('dashboard.index', compact('folders'));
+        return view('dashboard.index', compact('folders', 'files'));
     }
 }
