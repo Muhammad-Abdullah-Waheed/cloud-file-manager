@@ -23,6 +23,8 @@ use App\Repositories\Interfaces\FileVersionRepositoryInterface;
 use App\Repositories\FileVersionRepository;
 use App\Models\File;
 use App\Policies\FilePolicy;
+use Illuminate\Support\Facades\Route;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -46,6 +48,12 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Folder::class, FolderPolicy::class);
         Gate::policy(File::class, FilePolicy::class);
 
+        Route::bind('file', function ($value) {
+            return File::withTrashed()->findOrFail($value);
+        });
+        Route::bind('folder', function ($value) {
+            return Folder::withTrashed()->findOrFail($value);
+        });
 
         $this->configureDefaults();
         Model::unguard();

@@ -14,4 +14,6 @@ interface FolderRepositoryInterface
     public function rename(int $folderId, string $name): void;
     public function softDelete(int $folderId): void;
     public function restore(int $folderId): void;
+    public function getTrashed(int $userId): Collection;
+    public function permanentDelete(int $folderId): void;
 }

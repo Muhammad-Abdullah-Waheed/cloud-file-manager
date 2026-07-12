@@ -48,4 +48,16 @@ class FolderRepository implements FolderRepositoryInterface
     {
         Folder::withTrashed()->findOrFail($folderId)->restore();
     }
+
+    public function getTrashed(int $userId): Collection
+    {
+        return Folder::onlyTrashed()
+            ->where('user_id', $userId)
+            ->get();
+    }
+
+    public function permanentDelete(int $folderId): void
+    {
+        Folder::withTrashed()->findOrFail($folderId)->forceDelete();
+    }
 }

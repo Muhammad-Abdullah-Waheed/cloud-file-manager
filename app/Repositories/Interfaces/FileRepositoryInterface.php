@@ -13,4 +13,6 @@ interface FileRepositoryInterface
     public function softDelete(int $fileId): void;
     public function restore(int $fileId): void;
     public function rename(int $fileId, string $name): void;
+    public function getTrashed(int $userId): Collection;
+    public function permanentDelete(int $fileId): void;
 }

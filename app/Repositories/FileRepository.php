@@ -46,4 +46,17 @@ class FileRepository implements FileRepositoryInterface
     {
         File::where('id', $fileId)->update(['name' => $name]);
     }
+
+    public function getTrashed(int $userId): Collection
+    {
+        return File::onlyTrashed()
+            ->where('user_id', $userId)
+            ->with('currentVersion')
+            ->get();
+    }
+
+    public function permanentDelete(int $fileId): void
+    {
+        File::withTrashed()->findOrFail($fileId)->forceDelete();
+    }
 }
