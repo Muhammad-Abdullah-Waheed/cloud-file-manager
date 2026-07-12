@@ -6,7 +6,6 @@ use App\Features\RegisterFeature;
 use App\Http\Requests\RegisterRequest;
 use Illuminate\Support\Facades\Auth;
 
-
 class RegisterUserController extends Controller
 {
     /**

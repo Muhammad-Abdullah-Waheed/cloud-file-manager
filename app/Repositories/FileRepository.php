@@ -21,15 +21,15 @@ class FileRepository implements FileRepositoryInterface
     public function getFilesInFolder(?int $folderId, int $userId): Collection
     {
         return File::where('user_id', $userId)
-        ->when($folderId === null, function ($query) {
-            // If folderId is null, look for root files
-            $query->whereNull('parent_id');
-        }, function ($query) use ($folderId) {
-            // If folderId is a number, look inside that subfolder
-            $query->where('parent_id', $folderId);
-        })
-        ->with('currentVersion')
-        ->get();
+            ->when($folderId === null, function ($query) {
+                // If folderId is null, look for root files
+                $query->whereNull('parent_id');
+            }, function ($query) use ($folderId) {
+                // If folderId is a number, look inside that subfolder
+                $query->where('parent_id', $folderId);
+            })
+            ->with('currentVersion')
+            ->get();
     }
 
     public function softDelete(int $fileId): void

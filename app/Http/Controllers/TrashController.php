@@ -17,7 +17,7 @@ class TrashController extends Controller
         $items = $feature->handle(auth()->id());
 
         return view('trash.index', [
-            'files'   => $items['files'],
+            'files' => $items['files'],
             'folders' => $items['folders'],
         ]);
     }
@@ -26,6 +26,7 @@ class TrashController extends Controller
     {
         $this->authorize('delete', $file);
         $feature->handle($file);
+
         return redirect()->back()->with('success', __('trash.file_restored'));
     }
 
@@ -33,6 +34,7 @@ class TrashController extends Controller
     {
         $this->authorize('delete', $folder);
         $feature->handle($folder);
+
         return redirect()->back()->with('success', __('trash.folder_restored'));
     }
 
@@ -40,6 +42,7 @@ class TrashController extends Controller
     {
         $this->authorize('delete', $file);
         $feature->handle($file);
+
         return redirect()->back()->with('success', __('trash.file_permanently_deleted'));
     }
 
@@ -47,6 +50,7 @@ class TrashController extends Controller
     {
         $this->authorize('delete', $folder);
         $feature->handle($folder);
+
         return redirect()->back()->with('success', __('trash.folder_permanently_deleted'));
     }
 }

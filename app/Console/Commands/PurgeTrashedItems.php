@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Storage;
 
 class PurgeTrashedItems extends Command
 {
-    protected $signature   = 'trash:purge';
+    protected $signature = 'trash:purge';
+
     protected $description = 'Permanently delete items trashed more than 30 days ago';
 
     public function handle(): void

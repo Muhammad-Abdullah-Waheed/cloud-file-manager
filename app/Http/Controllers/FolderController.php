@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Folder;
-use Illuminate\Http\Request;
+use App\Features\CreateFolderFeature;
+use App\Features\DeleteFolderFeature;
+use App\Features\RenameFolderFeature;
 use App\Http\Requests\CreateFolderRequest;
 use App\Http\Requests\RenameFolderRequest;
-use App\Features\CreateFolderFeature;
-use App\Features\RenameFolderFeature;
-use App\Features\DeleteFolderFeature;
+use App\Models\Folder;
 
 class FolderController extends Controller
 {
@@ -19,6 +18,7 @@ class FolderController extends Controller
     {
         $this->authorize('create', Folder::class);
         $folder = $feature->handle($request->validated(), auth()->id());
+
         return redirect()->back()->with('success', __('folder.created'));
     }
 
@@ -29,6 +29,7 @@ class FolderController extends Controller
     {
         $this->authorize('update', $folder);
         $feature->handle($folder->id, $request->validated()['name']);
+
         return redirect()->back()->with('success', __('folder.renamed'));
     }
 
@@ -39,6 +40,7 @@ class FolderController extends Controller
     {
         $this->authorize('delete', $folder);
         $feature->handle($folder->id);
+
         return redirect()->back()->with('success', __('folder.deleted'));
     }
 }

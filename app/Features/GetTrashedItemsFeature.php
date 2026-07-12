@@ -4,7 +4,6 @@ namespace App\Features;
 
 use App\Repositories\Interfaces\FileRepositoryInterface;
 use App\Repositories\Interfaces\FolderRepositoryInterface;
-use Illuminate\Support\Collection;
 
 class GetTrashedItemsFeature
 {
@@ -16,7 +15,7 @@ class GetTrashedItemsFeature
     public function handle(int $userId): array
     {
         return [
-            'files'   => $this->files->getTrashed($userId),
+            'files' => $this->files->getTrashed($userId),
             'folders' => $this->folders->getTrashed($userId),
         ];
     }

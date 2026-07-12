@@ -4,8 +4,8 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class CreateFolderRequest extends FormRequest
 {
@@ -25,6 +25,7 @@ class CreateFolderRequest extends FormRequest
     public function rules(): array
     {
         $parentId = $this->input('parent_id') ?: null;
+
         return [
             'name' => [
                 'required',
@@ -46,7 +47,6 @@ class CreateFolderRequest extends FormRequest
 
     /**
      * Prepare the data for validation.
-     * @return void
      */
     public function prepareForValidation(): void
     {
@@ -55,7 +55,6 @@ class CreateFolderRequest extends FormRequest
             $this->merge(['slug_check' => Str::slug($this->input('name'))]);
         }
     }
-
 
     public function messages(): array
     {

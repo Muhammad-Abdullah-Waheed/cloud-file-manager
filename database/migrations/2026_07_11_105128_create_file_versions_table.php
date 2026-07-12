@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('file_versions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('file_id')->constrained('files')->cascadeOnDelete();
-            $table->string('path',2048);
+            $table->string('path', 2048);
             $table->unsignedInteger('size');
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->unsignedInteger('version_number');

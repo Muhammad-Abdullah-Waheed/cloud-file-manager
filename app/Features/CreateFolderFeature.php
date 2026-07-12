@@ -14,8 +14,8 @@ class CreateFolderFeature
     public function handle(array $data, int $userId): Folder
     {
         return $this->folderRepository->create([
-            'name'      => $data['name'],
-            'user_id'   => $userId,
+            'name' => $data['name'],
+            'user_id' => $userId,
             'parent_id' => $data['parent_id'] ?? null,
         ]);
     }

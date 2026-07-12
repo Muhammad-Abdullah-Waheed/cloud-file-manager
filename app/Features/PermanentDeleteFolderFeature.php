@@ -4,6 +4,7 @@ namespace App\Features;
 
 use App\Models\Folder;
 use App\Repositories\Interfaces\FolderRepositoryInterface;
+
 class PermanentDeleteFolderFeature
 {
     public function __construct(

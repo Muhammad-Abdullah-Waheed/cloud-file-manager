@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginFeature
 {
-    public function handle(array $data):bool
+    public function handle(array $data): bool
     {
         return Auth::attempt(
             [

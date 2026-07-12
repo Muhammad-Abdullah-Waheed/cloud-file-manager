@@ -6,7 +6,6 @@ use App\Models\User;
 use App\Repositories\Interfaces\RoleRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 
 class RegisterFeature
 {
@@ -17,17 +16,18 @@ class RegisterFeature
 
     public function handle(array $data): User
     {
-        return DB::transaction(function() use ($data) {
+        return DB::transaction(function () use ($data) {
             $role = $this->roleRepository->findByName('user');
-            if (!$role) {
+            if (! $role) {
                 throw new \Exception('Role not found');
             }
+
             return $this->userRepository->create([
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'password' => $data['password'],
                 'role_id' => $role->id,
             ]);
-        },3);
+        }, 3);
     }
 }

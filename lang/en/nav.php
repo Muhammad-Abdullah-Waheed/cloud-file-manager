@@ -1,9 +1,8 @@
 <?php
 
-
 return [
-    'brand'    => 'CloudNest',
-    'login'    => 'Login',
+    'brand' => 'CloudNest',
+    'login' => 'Login',
     'register' => 'Register',
-    'logout'   => 'Logout',
+    'logout' => 'Logout',
 ];

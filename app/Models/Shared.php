@@ -18,10 +18,12 @@ class Shared extends Model
     {
         return $this->belongsTo(User::class);
     }
+
     public function receiver()
     {
         return $this->belongsTo(User::class);
     }
+
     public function shared()
     {
         return $this->morphTo();

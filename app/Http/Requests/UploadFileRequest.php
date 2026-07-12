@@ -16,7 +16,7 @@ class UploadFileRequest extends FormRequest
         $extensions = env('ALLOWED_FILE_EXTENSIONS', 'jpg,jpeg,png,pdf,doc,docx,zip,txt');
 
         return [
-            'file'      => ['required', 'file', 'mimes:' . $extensions, 'max:102400'], // 100MB max
+            'file' => ['required', 'file', 'mimes:'.$extensions, 'max:102400'], // 100MB max
             'parent_id' => ['nullable', 'integer', 'exists:folders,id'],
         ];
     }

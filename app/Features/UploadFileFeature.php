@@ -9,7 +9,6 @@ use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use App\Models\User;
 
 class UploadFileFeature
 {
@@ -33,25 +32,25 @@ class UploadFileFeature
         return DB::transaction(function () use ($uploadedFile, $userId, $parentId, $fileSize) {
             // Store physical file
             $path = Storage::putFile(
-                'files/' . $userId,
+                'files/'.$userId,
                 $uploadedFile
             );
 
             // Create file record
             $file = $this->files->create([
-                'name'      => $uploadedFile->getClientOriginalName(),
-                'user_id'   => $userId,
+                'name' => $uploadedFile->getClientOriginalName(),
+                'user_id' => $userId,
                 'parent_id' => $parentId,
                 'mime_type' => $uploadedFile->getMimeType(),
             ]);
 
             // Create first version
             $this->versions->createVersion([
-                'file_id'        => $file->id,
-                'path'           => $path,
-                'size'           => $fileSize,
+                'file_id' => $file->id,
+                'path' => $path,
+                'size' => $fileSize,
                 'version_number' => 1,
-                'user_id'        => $userId,
+                'user_id' => $userId,
             ]);
 
             // Increment storage used

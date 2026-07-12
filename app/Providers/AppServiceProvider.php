@@ -2,29 +2,28 @@
 
 namespace App\Providers;
 
+use App\Models\File;
+use App\Models\Folder;
+use App\Policies\FilePolicy;
+use App\Policies\FolderPolicy;
+use App\Repositories\FileRepository;
+use App\Repositories\FileVersionRepository;
+use App\Repositories\FolderRepository;
+use App\Repositories\Interfaces\FileRepositoryInterface;
+use App\Repositories\Interfaces\FileVersionRepositoryInterface;
+use App\Repositories\Interfaces\FolderRepositoryInterface;
+use App\Repositories\Interfaces\RoleRepositoryInterface;
+use App\Repositories\Interfaces\UserRepositoryInterface;
+use App\Repositories\RoleRepository;
+use App\Repositories\UserRepository;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
-use App\Repositories\Interfaces\UserRepositoryInterface;
-use App\Repositories\UserRepository;
-use App\Repositories\Interfaces\RoleRepositoryInterface;
-use App\Repositories\RoleRepository;
-use App\Repositories\Interfaces\FolderRepositoryInterface;
-use App\Repositories\FolderRepository;
-use App\Models\Folder;
-use App\Policies\FolderPolicy;
-use Illuminate\Support\Facades\Gate;
-use App\Repositories\Interfaces\FileRepositoryInterface;
-use App\Repositories\FileRepository;
-use App\Repositories\Interfaces\FileVersionRepositoryInterface;
-use App\Repositories\FileVersionRepository;
-use App\Models\File;
-use App\Policies\FilePolicy;
-use Illuminate\Support\Facades\Route;
-
 
 class AppServiceProvider extends ServiceProvider
 {

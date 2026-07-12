@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Features\DeleteFileFeature;
+use App\Features\DownloadFileFeature;
+use App\Features\UploadFileFeature;
+use App\Http\Requests\UploadFileRequest;
 use App\Models\File;
 use Illuminate\Http\Request;
-use App\Http\Requests\UploadFileRequest;
-use App\Features\UploadFileFeature;
-use App\Features\DownloadFileFeature;
-use App\Features\DeleteFileFeature;
 
 class FileController extends Controller
 {
@@ -42,6 +42,7 @@ class FileController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
+
         return redirect()->back()->with('success', __('file.uploaded'));
     }
 
@@ -51,6 +52,7 @@ class FileController extends Controller
     public function show(File $file, DownloadFileFeature $feature)
     {
         $this->authorize('view', $file);
+
         return $feature->handle($file);
     }
 
@@ -77,6 +79,7 @@ class FileController extends Controller
     {
         $this->authorize('delete', $file);
         $feature->handle($file);
+
         return redirect()->back()->with('success', __('file.deleted'));
     }
 }

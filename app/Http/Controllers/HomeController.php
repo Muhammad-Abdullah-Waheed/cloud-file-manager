@@ -14,6 +14,7 @@ class HomeController extends Controller
         if (auth()->check()) {
             return redirect()->route('dashboard');
         }
+
         return view('home');
     }
 

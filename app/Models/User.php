@@ -63,9 +63,6 @@ class User extends Authenticatable
 
     /**
      * Check if the user belongs to a specific role.
-     *
-     * @param string $roleName
-     * @return bool
      */
     public function hasRole(string $roleName): bool
     {
@@ -81,6 +78,4 @@ class User extends Authenticatable
     {
         return $this->hasMany(File::class);
     }
-
-
 }

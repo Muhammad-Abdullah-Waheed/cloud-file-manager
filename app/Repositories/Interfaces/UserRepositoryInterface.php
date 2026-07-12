@@ -13,6 +13,6 @@ interface UserRepositoryInterface
     public function findById(int $id): ?User;
 
     public function incrementStorageUsed(int $userId, int $bytes): void;
-    
+
     public function decrementStorageUsed(int $userId, int $bytes): void;
 }

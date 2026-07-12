@@ -5,6 +5,7 @@ namespace App\Features;
 use App\Models\File;
 use App\Repositories\Interfaces\FileRepositoryInterface;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DownloadFileFeature
 {
@@ -12,7 +13,7 @@ class DownloadFileFeature
         private FileRepositoryInterface $files,
     ) {}
 
-    public function handle(File $file): \Symfony\Component\HttpFoundation\StreamedResponse
+    public function handle(File $file): StreamedResponse
     {
         $version = $file->currentVersion;
 
