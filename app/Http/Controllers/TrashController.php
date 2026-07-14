@@ -32,7 +32,7 @@ class TrashController extends Controller
 
     public function restoreFolder(Folder $folder, RestoreFolderFeature $feature)
     {
-        $this->authorize('delete', $folder);
+        $this->authorize('restore', $folder);
         $feature->handle($folder);
 
         return redirect()->back()->with('success', __('trash.folder_restored'));
@@ -40,7 +40,7 @@ class TrashController extends Controller
 
     public function destroyFile(File $file, PermanentDeleteFileFeature $feature)
     {
-        $this->authorize('delete', $file);
+        $this->authorize('forceDelete', $file);
         $feature->handle($file);
 
         return redirect()->back()->with('success', __('trash.file_permanently_deleted'));

@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\RequirePermission;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -19,6 +20,9 @@ return Application::configure(basePath: dirname(__DIR__))
             // HandleInertiaRequests::class,
             // AddLinkHeadersForPreloadedAssets::class,
             SetLocale::class,
+            $middleware->alias([
+                'permission' => RequirePermission::class,
+            ]),
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

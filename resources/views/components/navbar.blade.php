@@ -32,6 +32,66 @@
             </a>
         @endguest
 
+
+        @auth
+            {{-- Notification bell --}}
+            <div class="dropdown dropdown-end">
+                <button tabindex="0" class="btn btn-ghost btn-circle">
+                    <div class="indicator">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002
+                                    6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388
+                                    6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3
+                                    0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        @if(auth()->user()->unreadNotifications->count() > 0)
+                            <span class="badge badge-xs badge-primary indicator-item">
+                                {{ auth()->user()->unreadNotifications->count() }}
+                            </span>
+                        @endif
+                    </div>
+                </button>
+                <div tabindex="0"
+                    class="dropdown-content bg-base-100 rounded-box shadow-lg z-50 w-80 p-2 border border-base-200 mt-2">
+                    <div class="flex justify-between items-center px-2 py-1 mb-1">
+                        <span class="font-semibold text-sm">{{ __('notifications.title') }}</span>
+                        @if(auth()->user()->unreadNotifications->count() > 0)
+                            <form method="POST" action="{{ route('notifications.readAll') }}">
+                                @csrf @method('PATCH')
+                                <button class="text-xs link link-primary">
+                                    {{ __('notifications.mark_all_read') }}
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                    @forelse(auth()->user()->notifications->take(5) as $notification)
+                        <div class="flex items-start gap-2 px-2 py-2 rounded-lg
+                                    {{ $notification->read_at ? 'opacity-60' : 'bg-base-200' }}">
+                            <p class="text-xs flex-1">{{ $notification->data['message'] }}</p>
+                            @if(!$notification->read_at)
+                                <form method="POST" action="{{ route('notifications.read', $notification->id) }}">
+                                    @csrf @method('PATCH')
+                                    <button class="text-xs link link-primary whitespace-nowrap">
+                                        {{ __('notifications.mark_read') }}
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+                    @empty
+                        <p class="text-xs text-center text-base-content/50 py-4">
+                            {{ __('notifications.empty') }}
+                        </p>
+                    @endforelse
+                    <a href="{{ route('notifications.index') }}"
+                    class="block text-center text-xs link link-primary mt-2 py-1">
+                        {{ __('notifications.view_all') }}
+                    </a>
+                </div>
+            </div>
+        @endauth
+
         @auth
             <div class="flex items-center gap-2">
                 <div class="badge badge-ghost badge-lg font-medium">

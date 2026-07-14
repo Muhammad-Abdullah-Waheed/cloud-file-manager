@@ -9,6 +9,7 @@ use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Notifications\StorageQuotaWarningNotification;
 
 class UploadFileFeature
 {
@@ -55,6 +56,13 @@ class UploadFileFeature
 
             // Increment storage used
             $this->users->incrementStorageUsed($userId, $fileSize);
+            
+
+            $updatedUser = $this->users->findById($userId);
+            $percent = (int) round(($updatedUser->storage_used / $updatedUser->storage_limit) * 100);
+            if ($percent >= 80) {
+                $updatedUser->notify(new StorageQuotaWarningNotification($percent));
+            }
 
             return $file;
         });

@@ -9,6 +9,8 @@ use App\Http\Controllers\LoginUserController;
 use App\Http\Controllers\RegisterUserController;
 use App\Http\Controllers\TrashController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ShareController;
+use App\Http\Controllers\NotificationController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -33,6 +35,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/folders', [FolderController::class, 'store'])->name('folders.store');
     Route::patch('/folders/{folder}', [FolderController::class, 'update'])->name('folders.update');
     Route::delete('/folders/{folder}', [FolderController::class, 'destroy'])->name('folders.destroy');
+    Route::get('/folders/{folder}', [FolderController::class, 'show'])->name('folders.show');
 
     Route::post('/files', [FileController::class, 'store'])->name('files.store');
     Route::get('/files/{file}/download', [FileController::class, 'show'])->name('files.download');
@@ -43,4 +46,26 @@ Route::middleware('auth')->group(function () {
     Route::patch('/trash/folders/{folder}/restore', [TrashController::class, 'restoreFolder'])->name('trash.folders.restore');
     Route::delete('/trash/files/{file}', [TrashController::class, 'destroyFile'])->name('trash.files.destroy');
     Route::delete('/trash/folders/{folder}', [TrashController::class, 'destroyFolder'])->name('trash.folders.destroy');
+
+
+    Route::get('/shared', [ShareController::class, 'index'])->name('share.index');
+    Route::post('/shared', [ShareController::class, 'store'])->name('share.store');
+    Route::patch('/share/{shared}', [ShareController::class, 'update'])->name('share.update');
+    Route::delete('/share/{shared}', [ShareController::class, 'destroy'])->name('share.destroy');
+
+    // Admin & Manager panel
+    Route::middleware('permission:view-all-files')
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/users', [AdminController::class, 'index'])->name('users.index');
+        Route::get('/users/{user}', [AdminController::class, 'showUser'])->name('users.show');
+        Route::get('/users/{user}/folders/{folder}', [AdminController::class, 'showFolder'])->name('users.folders.show');
+        Route::delete('/users/{user}/files/{file}', [AdminController::class, 'destroyFile'])->name('users.files.destroy');
+        Route::delete('/users/{user}/folders/{folder}', [AdminController::class, 'destroyFolder'])->name('users.folders.destroy');
+    });
+
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
 });

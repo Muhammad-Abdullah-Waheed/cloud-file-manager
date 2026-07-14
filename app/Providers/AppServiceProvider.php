@@ -24,6 +24,11 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use App\Repositories\Interfaces\ShareRepositoryInterface;
+use App\Repositories\ShareRepository;
+use App\Policies\SharePolicy;
+use App\Models\Shared;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -37,6 +42,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(FolderRepositoryInterface::class, FolderRepository::class);
         $this->app->bind(FileRepositoryInterface::class, FileRepository::class);
         $this->app->bind(FileVersionRepositoryInterface::class, FileVersionRepository::class);
+        $this->app->bind(ShareRepositoryInterface::class, ShareRepository::class);
     }
 
     /**
@@ -46,6 +52,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::policy(Folder::class, FolderPolicy::class);
         Gate::policy(File::class, FilePolicy::class);
+        Gate::policy(Shared::class, SharePolicy::class);
 
         Route::bind('file', function ($value) {
             return File::withTrashed()->findOrFail($value);
@@ -54,6 +61,12 @@ class AppServiceProvider extends ServiceProvider
             return Folder::withTrashed()->findOrFail($value);
         });
 
+        
+        Relation::morphMap([
+            'folder' => Folder::class,
+            'file'   => File::class,
+        ]);
+        
         $this->configureDefaults();
         Model::unguard();
         Model::shouldBeStrict();

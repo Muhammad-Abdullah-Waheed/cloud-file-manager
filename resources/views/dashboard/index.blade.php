@@ -25,16 +25,15 @@
             {{ __('file.upload') }}
         </label>
 
-        {{-- Hidden upload form --}}
         <form method="POST" action="{{ route('files.store') }}" enctype="multipart/form-data" id="upload_form">
             @csrf
-            <input type="hidden" name="parent_id" value="">
+            <input type="hidden" name="parent_id" value="{{ $currentFolder?->id ?? '' }}">
             <input type="file" id="file_upload_input" name="file" class="hidden"
                    onchange="document.getElementById('upload_form').submit()" />
         </form>
 
         <a href="{{ route('dashboard') }}"
-           class="flex items-center gap-3 px-3 py-2 rounded-lg bg-base-300 font-medium">
+           class="flex items-center gap-3 px-3 py-2 rounded-lg {{ is_null($currentFolder) ? 'bg-base-300 font-medium' : 'hover:bg-base-300' }}">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
                  viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -43,7 +42,8 @@
             {{ __('dashboard.my_drive') }}
         </a>
 
-        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-base-300">
+        <a href="{{ route('share.index') }}"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-base-300">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
                  viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -52,7 +52,8 @@
             {{ __('dashboard.shared') }}
         </a>
 
-        <a href="{{ route('trash') }}"  class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-base-300">
+        <a href="{{ route('trash') }}"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-base-300">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
                  viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -61,15 +62,15 @@
             {{ __('dashboard.trash') }}
         </a>
 
-        {{-- Storage bar — wired to real data --}}
+        {{-- Storage bar --}}
         <div class="mt-auto">
             @php
-                $user         = auth()->user();
-                $used         = $user->storage_used;
-                $limit        = $user->storage_limit;
-                $percent      = $limit > 0 ? round(($used / $limit) * 100) : 0;
-                $usedGB       = number_format($used / 1073741824, 2);
-                $limitGB      = number_format($limit / 1073741824, 1);
+                $user    = auth()->user();
+                $used    = $user->storage_used;
+                $limit   = $user->storage_limit;
+                $percent = $limit > 0 ? round(($used / $limit) * 100) : 0;
+                $usedGB  = number_format($used / 1073741824, 2);
+                $limitGB = number_format($limit / 1073741824, 1);
             @endphp
             <div class="text-xs text-base-content/60 mb-1">{{ __('dashboard.storage') }}</div>
             <progress class="progress progress-primary w-full"
@@ -84,23 +85,27 @@
     {{-- Main content --}}
     <main class="flex-1 overflow-y-auto p-6">
 
-        {{-- Flash messages --}}
         @if(session('success'))
-            <div class="alert alert-success mb-4">
-                <span>{{ session('success') }}</span>
-            </div>
+            <div class="alert alert-success mb-4"><span>{{ session('success') }}</span></div>
         @endif
-
         @if(session('error'))
-            <div class="alert alert-error mb-4">
-                <span>{{ session('error') }}</span>
-            </div>
+            <div class="alert alert-error mb-4"><span>{{ session('error') }}</span></div>
         @endif
 
         {{-- Breadcrumb --}}
         <div class="text-sm breadcrumbs mb-4">
             <ul>
-                <li>{{ __('dashboard.my_drive') }}</li>
+                <li>
+                    <a href="{{ route('dashboard') }}">{{ __('dashboard.my_drive') }}</a>
+                </li>
+                @foreach($ancestors as $ancestor)
+                    <li>
+                        <a href="{{ route('folders.show', $ancestor) }}">{{ $ancestor->name }}</a>
+                    </li>
+                @endforeach
+                @if($currentFolder)
+                    <li>{{ $currentFolder->name }}</li>
+                @endif
             </ul>
         </div>
 
@@ -112,16 +117,19 @@
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
                 @foreach($folders as $folder)
                     <div class="group relative flex flex-col items-center p-3 rounded-xl
-                                hover:bg-base-200 cursor-pointer transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                             class="h-12 w-12 text-primary mb-2" fill="currentColor"
-                             viewBox="0 0 24 24">
-                            <path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2
-                                     2H5a2 2 0 01-2-2V7z" />
-                        </svg>
-                        <span class="text-xs text-center truncate w-full">
-                            {{ $folder->name }}
-                        </span>
+                                hover:bg-base-200 transition-colors">
+
+                        <a href="{{ route('folders.show', $folder) }}"
+                           class="flex flex-col items-center w-full">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 class="h-12 w-12 text-primary mb-2" fill="currentColor"
+                                 viewBox="0 0 24 24">
+                                <path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2
+                                         2H5a2 2 0 01-2-2V7z" />
+                            </svg>
+                            <span class="text-xs text-center truncate w-full">{{ $folder->name }}</span>
+                        </a>
+
                         <div class="dropdown dropdown-end absolute top-1 end-1
                                     opacity-0 group-hover:opacity-100 transition-opacity">
                             <button tabindex="0" class="btn btn-ghost btn-xs">
@@ -138,6 +146,10 @@
                                 <li>
                                     <button onclick="openRenameModal({{ $folder->id }}, '{{ addslashes($folder->name) }}')"
                                             class="text-sm">{{ __('folder.rename') }}</button>
+                                </li>
+                                <li>
+                                    <button onclick="openShareModal('folder', {{ $folder->id }})"
+                                            class="text-sm">{{ __('share.share') }}</button>
                                 </li>
                                 <li>
                                     <button onclick="openFolderDeleteModal({{ $folder->id }}, '{{ addslashes($folder->name) }}')"
@@ -170,8 +182,9 @@
                         @foreach($files as $file)
                             <tr>
                                 <td class="flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-base-content/40"
-                                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                         class="h-5 w-5 text-base-content/40" fill="none"
+                                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                               d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                     </svg>
@@ -181,8 +194,7 @@
                                 <td class="text-sm text-base-content/60">
                                     @if($file->currentVersion)
                                         {{ number_format($file->currentVersion->size / 1024, 1) }} KB
-                                    @else
-                                        —
+                                    @else —
                                     @endif
                                 </td>
                                 <td class="text-sm text-base-content/60">
@@ -191,13 +203,11 @@
                                 <td>
                                     <div class="flex items-center gap-1 justify-end">
                                         <a href="{{ route('files.download', $file) }}"
-                                           class="btn btn-ghost btn-xs">
-                                            {{ __('file.download') }}
-                                        </a>
+                                           class="btn btn-ghost btn-xs">{{ __('file.download') }}</a>
+                                        <button onclick="openShareModal('file', {{ $file->id }})"
+                                                class="btn btn-ghost btn-xs">{{ __('share.share') }}</button>
                                         <button onclick="openFileDeleteModal({{ $file->id }}, '{{ addslashes($file->name) }}')"
-                                                class="btn btn-ghost btn-xs text-error">
-                                            {{ __('file.delete') }}
-                                        </button>
+                                                class="btn btn-ghost btn-xs text-error">{{ __('file.delete') }}</button>
                                     </div>
                                 </td>
                             </tr>
@@ -229,17 +239,13 @@
         <h3 class="font-bold text-lg mb-4">{{ __('folder.new_folder') }}</h3>
         <form method="POST" action="{{ route('folders.store') }}">
             @csrf
-            <input type="hidden" name="parent_id" value="">
+            <input type="hidden" name="parent_id" value="{{ $currentFolder?->id ?? '' }}">
             <div class="form-control mb-4">
-                <label class="label">
-                    <span class="label-text">{{ __('folder.folder_name') }}</span>
-                </label>
-                <input type="text" name="name" autofocus
-                       class="input input-bordered w-full" required />
+                <label class="label"><span class="label-text">{{ __('folder.folder_name') }}</span></label>
+                <input type="text" name="name" autofocus class="input input-bordered w-full" required />
             </div>
             <div class="modal-action">
-                <button type="button"
-                        onclick="document.getElementById('modal_new_folder').close()"
+                <button type="button" onclick="document.getElementById('modal_new_folder').close()"
                         class="btn btn-ghost">{{ __('folder.cancel') }}</button>
                 <button type="submit" class="btn btn-primary">{{ __('folder.create') }}</button>
             </div>
@@ -256,15 +262,12 @@
             @csrf
             @method('PATCH')
             <div class="form-control mb-4">
-                <label class="label">
-                    <span class="label-text">{{ __('folder.folder_name') }}</span>
-                </label>
+                <label class="label"><span class="label-text">{{ __('folder.folder_name') }}</span></label>
                 <input type="text" name="name" id="rename_input"
                        class="input input-bordered w-full" required />
             </div>
             <div class="modal-action">
-                <button type="button"
-                        onclick="document.getElementById('modal_rename_folder').close()"
+                <button type="button" onclick="document.getElementById('modal_rename_folder').close()"
                         class="btn btn-ghost">{{ __('folder.cancel') }}</button>
                 <button type="submit" class="btn btn-primary">{{ __('folder.rename') }}</button>
             </div>
@@ -281,11 +284,9 @@
             {{ __('folder.delete_confirm') }} <strong id="delete_folder_name"></strong>?
         </p>
         <form method="POST" id="delete_folder_form">
-            @csrf
-            @method('DELETE')
+            @csrf @method('DELETE')
             <div class="modal-action">
-                <button type="button"
-                        onclick="document.getElementById('modal_delete_folder').close()"
+                <button type="button" onclick="document.getElementById('modal_delete_folder').close()"
                         class="btn btn-ghost">{{ __('folder.cancel') }}</button>
                 <button type="submit" class="btn btn-error">{{ __('folder.delete') }}</button>
             </div>
@@ -302,13 +303,46 @@
             {{ __('file.delete_confirm') }} <strong id="delete_file_name"></strong>?
         </p>
         <form method="POST" id="delete_file_form">
-            @csrf
-            @method('DELETE')
+            @csrf @method('DELETE')
             <div class="modal-action">
-                <button type="button"
-                        onclick="document.getElementById('modal_delete_file').close()"
+                <button type="button" onclick="document.getElementById('modal_delete_file').close()"
                         class="btn btn-ghost">{{ __('file.cancel') }}</button>
                 <button type="submit" class="btn btn-error">{{ __('file.delete') }}</button>
+            </div>
+        </form>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+</dialog>
+
+{{-- Share Modal --}}
+<dialog id="modal_share" class="modal">
+    <div class="modal-box">
+        <h3 class="font-bold text-lg mb-4">{{ __('share.share') }}</h3>
+        <form method="POST" action="{{ route('share.store') }}" id="share_form">
+            @csrf
+            <input type="hidden" name="shared_type" id="share_type" value="">
+            <input type="hidden" name="shared_id" id="share_id" value="">
+            <div class="form-control mb-3">
+                <label class="label">
+                    <span class="label-text">{{ __('share.share_with') }}</span>
+                </label>
+                <input type="email" name="receiver_email" dir="ltr"
+                       placeholder="{{ __('share.email_placeholder') }}"
+                       class="input input-bordered w-full" required />
+            </div>
+            <div class="form-control mb-4">
+                <label class="label">
+                    <span class="label-text">{{ __('share.permission') }}</span>
+                </label>
+                <select name="permission" class="select select-bordered w-full">
+                    <option value="read">{{ __('share.read') }}</option>
+                    <option value="write">{{ __('share.write') }}</option>
+                </select>
+            </div>
+            <div class="modal-action">
+                <button type="button" onclick="document.getElementById('modal_share').close()"
+                        class="btn btn-ghost">{{ __('share.cancel') }}</button>
+                <button type="submit" class="btn btn-primary">{{ __('share.share') }}</button>
             </div>
         </form>
     </div>
@@ -330,6 +364,11 @@ function openFileDeleteModal(id, name) {
     document.getElementById('delete_file_form').action = '/files/' + id;
     document.getElementById('delete_file_name').textContent = name;
     document.getElementById('modal_delete_file').showModal();
+}
+function openShareModal(type, id) {
+    document.getElementById('share_type').value = type;
+    document.getElementById('share_id').value = id;
+    document.getElementById('modal_share').showModal();
 }
 </script>
 

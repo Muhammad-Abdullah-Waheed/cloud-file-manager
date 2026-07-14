@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Shared extends Model
 {
+    protected $table = 'folder_file_shares';
     protected $fillable = [
         'sender_id',
         'receiver_id',

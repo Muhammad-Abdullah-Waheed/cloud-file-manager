@@ -60,4 +60,19 @@ class FolderRepository implements FolderRepositoryInterface
     {
         Folder::withTrashed()->findOrFail($folderId)->forceDelete();
     }
+
+    public function getAncestors(Folder $folder): array
+    {
+        $ancestors = [];
+        $current = $folder;
+
+        while ($current->parent_id !== null) {
+            $current = Folder::find($current->parent_id);
+            if (! $current) break;
+            array_unshift($ancestors, $current);
+        }
+
+        return $ancestors;
+    }
+
 }

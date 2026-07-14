@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Role extends Model
 {
     protected $fillable = ['name'];
+    protected $with = ['permissions'];
 
     /**
      * @return HasMany

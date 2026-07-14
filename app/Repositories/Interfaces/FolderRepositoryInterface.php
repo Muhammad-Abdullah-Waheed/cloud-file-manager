@@ -24,4 +24,6 @@ interface FolderRepositoryInterface
     public function getTrashed(int $userId): Collection;
 
     public function permanentDelete(int $folderId): void;
+
+    public function getAncestors(Folder $folder): array;
 }

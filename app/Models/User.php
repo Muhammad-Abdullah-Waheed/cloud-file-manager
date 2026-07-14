@@ -78,4 +78,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(File::class);
     }
+
+    public function hasPermission(string $permission): bool
+    {
+        return $this->role->permissions->contains('name', $permission);
+    }
 }

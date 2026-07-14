@@ -9,9 +9,11 @@ class DashboardController extends Controller
 {
     public function index(GetRootFoldersFeature $foldersFeature, GetRootFilesFeature $filesFeature)
     {
-        $folders = $foldersFeature->handle(auth()->id());
-        $files = $filesFeature->handle(auth()->id());
-
-        return view('dashboard.index', compact('folders', 'files'));
+        return view('dashboard.index', [
+            'folders'       => $foldersFeature->handle(auth()->id()),
+            'files'         => $filesFeature->handle(auth()->id()),
+            'ancestors'     => [],
+            'currentFolder' => null,
+        ]);
     }
 }

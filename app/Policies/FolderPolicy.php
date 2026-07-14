@@ -12,7 +12,7 @@ class FolderPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->id === $folder->user_id;
+        return true;
     }
 
     /**
@@ -20,7 +20,8 @@ class FolderPolicy
      */
     public function view(User $user, Folder $folder): bool
     {
-        return $user->id === $folder->user_id;
+        return $user->id === $folder->user_id
+        || $user->hasPermission('view-all-files');
     }
 
     /**
@@ -44,7 +45,8 @@ class FolderPolicy
      */
     public function delete(User $user, Folder $folder): bool
     {
-        return $user->id === $folder->user_id;
+        return $user->id === $folder->user_id
+        || $user->hasPermission('delete-any-folders');
     }
 
     /**
@@ -52,7 +54,8 @@ class FolderPolicy
      */
     public function restore(User $user, Folder $folder): bool
     {
-        return $user->id === $folder->user_id;
+        return $user->id === $folder->user_id
+        || $user->hasPermission('delete-any-file');
     }
 
     /**
@@ -60,6 +63,7 @@ class FolderPolicy
      */
     public function forceDelete(User $user, Folder $folder): bool
     {
-        return $user->id === $folder->user_id;
+        return $user->id === $folder->user_id
+        || $user->hasPermission('delete-any-file');
     }
 }
