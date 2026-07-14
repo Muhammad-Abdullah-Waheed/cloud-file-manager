@@ -20,9 +20,10 @@ return Application::configure(basePath: dirname(__DIR__))
             // HandleInertiaRequests::class,
             // AddLinkHeadersForPreloadedAssets::class,
             SetLocale::class,
-            $middleware->alias([
-                'permission' => RequirePermission::class,
-            ]),
+
+        ]);
+        $middleware->alias([
+            'permission' => RequirePermission::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
