@@ -171,7 +171,13 @@
                                 <td class="text-sm text-base-content/60">
                                     {{ $file->created_at->diffForHumans() }}
                                 </td>
-                                <td>
+                                        <td class="flex items-center gap-1">
+                                    {{-- Download: admin + manager --}}
+                                    <a href="{{ route('admin.users.files.download', [$user, $file]) }}"
+                                       class="btn btn-ghost btn-xs text-primary">
+                                        {{ __('admin.download') }}
+                                    </a>
+                                    {{-- Delete: admin only --}}
                                     @if(auth()->user()->hasPermission('delete-any-file'))
                                         <button onclick="openFileDeleteModal({{ $file->id }}, '{{ addslashes($file->name) }}')"
                                                 class="btn btn-ghost btn-xs text-error">

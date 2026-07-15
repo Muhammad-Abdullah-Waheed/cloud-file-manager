@@ -15,4 +15,5 @@ return [
     'file_deleted'       => 'File deleted successfully.',
     'folder_deleted'     => 'Folder deleted successfully.',
     'user_has_no_files'  => ':name has no files or folders here.',
+    'download'           => 'Download',
 ];

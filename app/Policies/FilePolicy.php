@@ -26,7 +26,8 @@ class FilePolicy
 
     public function download(User $user, File $file): bool
     {
-        return $user->id === $file->user_id;
+        return $user->id === $file->user_id
+            || $user->hasPermission('view-all-files');
     }
 
     public function restore(User $user, File $file): bool

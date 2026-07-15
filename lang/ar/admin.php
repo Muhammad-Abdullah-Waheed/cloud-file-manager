@@ -15,4 +15,5 @@ return [
     'file_deleted'       => 'تم حذف الملف بنجاح.',
     'folder_deleted'     => 'تم حذف المجلد بنجاح.',
     'user_has_no_files'  => 'لا توجد ملفات أو مجلدات لـ :name هنا.',
+    'download'           => 'تنزيل',
 ];

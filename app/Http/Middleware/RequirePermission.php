@@ -13,12 +13,12 @@ class RequirePermission
      *
      * @param  Closure(Request): (Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, string $permission): Response
     {
         if (! auth()->check() || ! auth()->user()->hasPermission($permission)) {
             abort(403, 'Unauthorized.');
         }
-        
+
         return $next($request);
     }
 }

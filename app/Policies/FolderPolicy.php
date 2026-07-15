@@ -46,7 +46,7 @@ class FolderPolicy
     public function delete(User $user, Folder $folder): bool
     {
         return $user->id === $folder->user_id
-        || $user->hasPermission('delete-any-folders');
+        || $user->hasPermission('delete-any-file');
     }
 
     /**

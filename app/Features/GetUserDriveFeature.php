@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Features\Admin;
+namespace App\Features;
 
 use App\Repositories\Interfaces\FileRepositoryInterface;
 use App\Repositories\Interfaces\FolderRepositoryInterface;

@@ -3,6 +3,7 @@
 namespace App\Repositories\Interfaces;
 
 use App\Models\User;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface UserRepositoryInterface
 {
@@ -11,6 +12,8 @@ interface UserRepositoryInterface
     public function findByEmail(string $email): ?User;
 
     public function findById(int $id): ?User;
+
+    public function search(?string $term, int $perPage = 20): LengthAwarePaginator;
 
     public function incrementStorageUsed(int $userId, int $bytes): void;
 
