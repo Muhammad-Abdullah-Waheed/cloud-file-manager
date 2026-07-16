@@ -12,6 +12,7 @@ use App\Http\Controllers\RegisterUserController;
 use App\Http\Controllers\ShareController;
 use App\Http\Controllers\TrashController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DeleteRequestController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -68,6 +69,14 @@ Route::middleware('auth')->group(function () {
             // Delete: admin only (delete-any-file)
             Route::delete('/users/{user}/files/{file}', [AdminController::class, 'destroyFile'])->name('users.files.destroy');
             Route::delete('/users/{user}/folders/{folder}', [AdminController::class, 'destroyFolder'])->name('users.folders.destroy');
+
+            // Delete requests (view-all-files = manager + admin)
+            Route::get('/delete-requests', [DeleteRequestController::class, 'index'])->name('delete-requests.index');
+            Route::post('/delete-requests', [DeleteRequestController::class, 'store'])->name('delete-requests.store');
+
+            // Approve / reject (delete-any-file = admin only, enforced in controller)
+            Route::patch('/delete-requests/{deleteRequest}/approve', [DeleteRequestController::class, 'approve'])->name('delete-requests.approve');
+            Route::patch('/delete-requests/{deleteRequest}/reject', [DeleteRequestController::class, 'reject'])->name('delete-requests.reject');
         });
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');

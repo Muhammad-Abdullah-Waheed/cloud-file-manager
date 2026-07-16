@@ -20,6 +20,18 @@
             {{ __('admin.back_to_users') }}
         </a>
 
+        <a href="{{ route('admin.delete-requests.index') }}"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-base-300 text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            {{ __('admin.delete_requests') }}
+        </a>
+
+        <div class="divider my-1"></div>
+
         {{-- User info card --}}
         <div class="card bg-base-100 border border-base-300 mt-2">
             <div class="card-body p-4 gap-1">
@@ -105,6 +117,7 @@
                             <span class="text-xs text-center truncate w-full">{{ $folder->name }}</span>
                         </a>
 
+                        {{-- Admin: direct delete --}}
                         @if(auth()->user()->hasPermission('delete-any-file'))
                             <div class="dropdown dropdown-end absolute top-1 end-1
                                         opacity-0 group-hover:opacity-100 transition-opacity">
@@ -127,7 +140,22 @@
                                     </li>
                                 </ul>
                             </div>
+
+                        {{-- Manager: request delete --}}
+                        @elseif(auth()->user()->hasRole('manager'))
+                            <div class="absolute top-1 end-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onclick="openRequestDeleteModal('folder', {{ $folder->id }}, '{{ addslashes($folder->name) }}')"
+                                        class="btn btn-ghost btn-xs text-warning"
+                                        title="{{ __('admin.request_delete') }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
+                                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
                         @endif
+
                     </div>
                 @endforeach
             </div>
@@ -171,19 +199,29 @@
                                 <td class="text-sm text-base-content/60">
                                     {{ $file->created_at->diffForHumans() }}
                                 </td>
-                                        <td class="flex items-center gap-1">
-                                    {{-- Download: admin + manager --}}
-                                    <a href="{{ route('admin.users.files.download', [$user, $file]) }}"
-                                       class="btn btn-ghost btn-xs text-primary">
-                                        {{ __('admin.download') }}
-                                    </a>
-                                    {{-- Delete: admin only --}}
-                                    @if(auth()->user()->hasPermission('delete-any-file'))
-                                        <button onclick="openFileDeleteModal({{ $file->id }}, '{{ addslashes($file->name) }}')"
-                                                class="btn btn-ghost btn-xs text-error">
-                                            {{ __('file.delete') }}
-                                        </button>
-                                    @endif
+                                <td>
+                                    <div class="flex items-center gap-1">
+                                        {{-- Download: admin + manager --}}
+                                        <a href="{{ route('admin.users.files.download', [$user, $file]) }}"
+                                           class="btn btn-ghost btn-xs text-primary">
+                                            {{ __('admin.download') }}
+                                        </a>
+
+                                        {{-- Admin: direct delete --}}
+                                        @if(auth()->user()->hasPermission('delete-any-file'))
+                                            <button onclick="openFileDeleteModal({{ $file->id }}, '{{ addslashes($file->name) }}')"
+                                                    class="btn btn-ghost btn-xs text-error">
+                                                {{ __('file.delete') }}
+                                            </button>
+
+                                        {{-- Manager: request delete --}}
+                                        @elseif(auth()->user()->hasRole('manager'))
+                                            <button onclick="openRequestDeleteModal('file', {{ $file->id }}, '{{ addslashes($file->name) }}')"
+                                                    class="btn btn-ghost btn-xs text-warning">
+                                                {{ __('admin.request_delete') }}
+                                            </button>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
@@ -208,7 +246,7 @@
     </main>
 </div>
 
-{{-- Delete Folder Modal --}}
+{{-- Delete Folder Modal (admin only) --}}
 <dialog id="modal_delete_folder" class="modal">
     <div class="modal-box">
         <h3 class="font-bold text-lg mb-2">{{ __('folder.delete') }}</h3>
@@ -228,7 +266,7 @@
     <form method="dialog" class="modal-backdrop"><button>close</button></form>
 </dialog>
 
-{{-- Delete File Modal --}}
+{{-- Delete File Modal (admin only) --}}
 <dialog id="modal_delete_file" class="modal">
     <div class="modal-box">
         <h3 class="font-bold text-lg mb-2">{{ __('file.delete') }}</h3>
@@ -248,6 +286,39 @@
     <form method="dialog" class="modal-backdrop"><button>close</button></form>
 </dialog>
 
+{{-- Request Delete Modal (manager only) --}}
+<dialog id="modal_request_delete" class="modal">
+    <div class="modal-box">
+        <h3 class="font-bold text-lg mb-1">{{ __('admin.request_delete') }}</h3>
+        <p class="text-base-content/60 text-sm mb-4">
+            {{ __('admin.request_delete_for') }}:
+            <strong id="request_delete_target_name"></strong>
+        </p>
+        <form method="POST" action="{{ route('admin.delete-requests.store') }}" id="request_delete_form">
+            @csrf
+            <input type="hidden" name="target_type" id="request_delete_type">
+            <input type="hidden" name="target_id"   id="request_delete_id">
+            <div class="form-control mb-4">
+                <label class="label">
+                    <span class="label-text font-medium">{{ __('admin.justification') }}</span>
+                </label>
+                <textarea name="reason" rows="4" required minlength="10"
+                          placeholder="{{ __('admin.justification_placeholder') }}"
+                          class="textarea textarea-bordered w-full"></textarea>
+            </div>
+            <div class="modal-action">
+                <button type="button"
+                        onclick="document.getElementById('modal_request_delete').close()"
+                        class="btn btn-ghost">{{ __('folder.cancel') }}</button>
+                <button type="submit" class="btn btn-warning">
+                    {{ __('admin.send_request') }}
+                </button>
+            </div>
+        </form>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+</dialog>
+
 <script>
 function openFolderDeleteModal(id, name) {
     document.getElementById('delete_folder_form').action =
@@ -255,11 +326,20 @@ function openFolderDeleteModal(id, name) {
     document.getElementById('delete_folder_name').textContent = name;
     document.getElementById('modal_delete_folder').showModal();
 }
+
 function openFileDeleteModal(id, name) {
     document.getElementById('delete_file_form').action =
         '/admin/users/{{ $user->id }}/files/' + id;
     document.getElementById('delete_file_name').textContent = name;
     document.getElementById('modal_delete_file').showModal();
+}
+
+function openRequestDeleteModal(type, id, name) {
+    document.getElementById('request_delete_type').value = type;
+    document.getElementById('request_delete_id').value   = id;
+    document.getElementById('request_delete_target_name').textContent = name;
+    document.getElementById('request_delete_form').querySelector('textarea').value = '';
+    document.getElementById('modal_request_delete').showModal();
 }
 </script>
 

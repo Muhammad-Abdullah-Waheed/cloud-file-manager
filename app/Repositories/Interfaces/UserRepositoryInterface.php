@@ -4,6 +4,7 @@ namespace App\Repositories\Interfaces;
 
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 interface UserRepositoryInterface
 {
@@ -18,4 +19,6 @@ interface UserRepositoryInterface
     public function incrementStorageUsed(int $userId, int $bytes): void;
 
     public function decrementStorageUsed(int $userId, int $bytes): void;
+
+    public function getAdmins(): Collection;
 }

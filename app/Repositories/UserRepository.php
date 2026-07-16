@@ -44,4 +44,9 @@ class UserRepository implements UserRepositoryInterface
     {
         User::where('id', $userId)->decrement('storage_used', $bytes);
     }
+
+    public function getAdmins(): Collection
+    {
+        return User::whereHas('role', fn ($q) => $q->where('name', 'admin'))->get();
+    }
 }
