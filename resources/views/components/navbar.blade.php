@@ -23,6 +23,49 @@
             </button>
         </form>
 
+        @auth
+            @php($currentUser = auth()->user())
+
+            {{-- Storage meter --}}
+            <div class="hidden sm:flex flex-col items-end w-32" title="{{ $currentUser->usagePercent() }}%">
+                <progress class="progress {{ $currentUser->usagePercent() >= 90 ? 'progress-error' : ($currentUser->usagePercent() >= 80 ? 'progress-warning' : 'progress-primary') }} w-32 h-2"
+                          value="{{ $currentUser->usagePercent() }}" max="100"></progress>
+                <span class="text-[10px] text-base-content/60 mt-0.5">
+                    {{ __('nav.storage_used', ['percent' => $currentUser->usagePercent(), 'tier' => __('nav.tier_' . $currentUser->tier)]) }}
+                </span>
+            </div>
+
+            {{-- Admin / Manager panel button --}}
+            @if($currentUser->hasPermission('view-all-files'))
+                <a href="{{ route('admin.users.index') }}" class="btn btn-secondary btn-sm">
+                    {{ $currentUser->hasPermission('manage-users') ? __('nav.admin_panel') : __('nav.manager_panel') }}
+                </a>
+            @endif
+
+            {{-- Upgrade button (normal users only) --}}
+            @if($currentUser->isNormal())
+                <button class="btn btn-warning btn-sm" onclick="upgrade_modal.showModal()">
+                    {{ __('nav.upgrade') }}
+                </button>
+                <dialog id="upgrade_modal" class="modal">
+                    <div class="modal-box">
+                        <h3 class="text-lg font-bold">{{ __('nav.upgrade_title') }}</h3>
+                        <p class="py-2 text-sm text-base-content/70">{{ __('nav.upgrade_desc') }}</p>
+                        <form method="POST" action="{{ route('upgrade.request') }}">
+                            @csrf
+                            <textarea name="reason" rows="3" class="textarea textarea-bordered w-full"
+                                      placeholder="{{ __('nav.upgrade_reason_placeholder') }}"></textarea>
+                            <div class="modal-action">
+                                <button type="button" class="btn btn-ghost" onclick="upgrade_modal.close()">{{ __('file.cancel') }}</button>
+                                <button type="submit" class="btn btn-warning">{{ __('nav.upgrade_submit') }}</button>
+                            </div>
+                        </form>
+                    </div>
+                    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+                </dialog>
+            @endif
+        @endauth
+
         @guest
             <a href="{{ route('login') }}" class="btn btn-ghost btn-sm">
                 {{ __('nav.login') }}

@@ -4,6 +4,9 @@
 
 <div class="max-w-5xl mx-auto p-6">
 
+    @php($retentionDays = (int) config('storage.trash_retention_days', 2))
+    @php($bypassLock = auth()->user()->hasPermission('delete-any-file'))
+
     <h1 class="text-2xl font-bold mb-6">{{ __('trash.title') }}</h1>
 
     @if(session('success'))
@@ -48,10 +51,19 @@
                                     @csrf @method('PATCH')
                                     <button class="btn btn-ghost btn-xs">{{ __('trash.restore') }}</button>
                                 </form>
-                                <button onclick="openPermanentDeleteModal('{{ route('trash.folders.destroy', $folder) }}', '{{ addslashes($folder->name) }}')"
-                                        class="btn btn-ghost btn-xs text-error">
-                                    {{ __('trash.delete_permanently') }}
-                                </button>
+                                @php($folderAvailableAt = $folder->deleted_at->copy()->addDays($retentionDays))
+                                @if(!$bypassLock && $folderAvailableAt->isFuture())
+                                    <span class="tooltip tooltip-left" data-tip="{{ __('trash.retention_locked', ['time' => $folderAvailableAt->diffForHumans()]) }}">
+                                        <button class="btn btn-ghost btn-xs text-error" disabled>
+                                            {{ __('trash.delete_permanently') }}
+                                        </button>
+                                    </span>
+                                @else
+                                    <button onclick="openPermanentDeleteModal('{{ route('trash.folders.destroy', $folder) }}', '{{ addslashes($folder->name) }}')"
+                                            class="btn btn-ghost btn-xs text-error">
+                                        {{ __('trash.delete_permanently') }}
+                                    </button>
+                                @endif
                             </td>
                         </tr>
                     @endforeach
@@ -88,10 +100,19 @@
                                     @csrf @method('PATCH')
                                     <button class="btn btn-ghost btn-xs">{{ __('trash.restore') }}</button>
                                 </form>
-                                <button onclick="openPermanentDeleteModal('{{ route('trash.files.destroy', $file) }}', '{{ addslashes($file->name) }}')"
-                                        class="btn btn-ghost btn-xs text-error">
-                                    {{ __('trash.delete_permanently') }}
-                                </button>
+                                @php($fileAvailableAt = $file->deleted_at->copy()->addDays($retentionDays))
+                                @if(!$bypassLock && $fileAvailableAt->isFuture())
+                                    <span class="tooltip tooltip-left" data-tip="{{ __('trash.retention_locked', ['time' => $fileAvailableAt->diffForHumans()]) }}">
+                                        <button class="btn btn-ghost btn-xs text-error" disabled>
+                                            {{ __('trash.delete_permanently') }}
+                                        </button>
+                                    </span>
+                                @else
+                                    <button onclick="openPermanentDeleteModal('{{ route('trash.files.destroy', $file) }}', '{{ addslashes($file->name) }}')"
+                                            class="btn btn-ghost btn-xs text-error">
+                                        {{ __('trash.delete_permanently') }}
+                                    </button>
+                                @endif
                             </td>
                         </tr>
                     @endforeach

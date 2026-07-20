@@ -12,6 +12,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RegisterUserController;
 use App\Http\Controllers\ShareController;
 use App\Http\Controllers\TrashController;
+use App\Http\Controllers\UpgradeRequestController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -46,6 +47,10 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [LoginUserController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Premium upgrade request (any authenticated normal user)
+    Route::post('/upgrade-request', [UpgradeRequestController::class, 'store'])
+        ->name('upgrade.request');
 
     /*
     |----------------------------------------------------------------------
@@ -145,5 +150,15 @@ Route::middleware('auth')->group(function () {
                     Route::patch('/{deleteRequest}/reject', [DeleteRequestController::class, 'reject'])->name('reject');
                 });
             });
+
+            // Premium upgrade requests (admin-only: manage-users permission)
+            Route::middleware('permission:manage-users')
+                ->prefix('upgrade-requests')
+                ->name('upgrade-requests.')
+                ->group(function () {
+                    Route::get('/', [UpgradeRequestController::class, 'index'])->name('index');
+                    Route::patch('/{upgradeRequest}/approve', [UpgradeRequestController::class, 'approve'])->name('approve');
+                    Route::patch('/{upgradeRequest}/reject', [UpgradeRequestController::class, 'reject'])->name('reject');
+                });
         });
 });

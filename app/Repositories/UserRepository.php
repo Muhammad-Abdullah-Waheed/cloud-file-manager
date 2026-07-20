@@ -39,6 +39,11 @@ class UserRepository implements UserRepositoryInterface
         User::removeStorageUsed($userId, $bytes);
     }
 
+    public function upgradeToPremium(int $userId): void
+    {
+        User::upgradeToPremiumTier($userId);
+    }
+
     public function getAdmins(): Collection
     {
         return User::admins();

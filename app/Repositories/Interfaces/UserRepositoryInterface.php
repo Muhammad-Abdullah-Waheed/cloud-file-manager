@@ -20,5 +20,7 @@ interface UserRepositoryInterface
 
     public function decrementStorageUsed(int $userId, int $bytes): void;
 
+    public function upgradeToPremium(int $userId): void;
+
     public function getAdmins(): Collection;
 }

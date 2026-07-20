@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Features\DeleteFileFeature;
 use App\Features\DownloadFileFeature;
 use App\Features\UploadFileFeature;
+use App\Exceptions\StorageQuotaExceededException;
 use App\Http\Requests\UploadFileRequest;
 use App\Models\File;
 use Illuminate\Http\Request;
@@ -43,7 +44,9 @@ class FileController extends Controller
                 auth()->id(),
                 $request->validated()['parent_id'] ?? null,
             );
-        } catch (\Exception $e) {
+        } catch (StorageQuotaExceededException $e) {
+            return redirect()->back()->with('quota', $e->toArray());
+        } catch (\Throwable $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
 

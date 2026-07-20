@@ -31,6 +31,8 @@ use App\Models\Shared;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use App\Repositories\Interfaces\DeleteRequestRepositoryInterface;
 use App\Repositories\DeleteRequestRepository;
+use App\Repositories\Interfaces\UpgradeRequestRepositoryInterface;
+use App\Repositories\UpgradeRequestRepository;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -47,6 +49,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(FileVersionRepositoryInterface::class, FileVersionRepository::class);
         $this->app->bind(ShareRepositoryInterface::class, ShareRepository::class);
         $this->app->bind(DeleteRequestRepositoryInterface::class, DeleteRequestRepository::class);
+        $this->app->bind(UpgradeRequestRepositoryInterface::class, UpgradeRequestRepository::class);
     }
 
     /**

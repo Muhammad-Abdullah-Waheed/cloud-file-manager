@@ -6,6 +6,7 @@ use App\Models\Concerns\SoftDeletableRecord;
 use App\Models\Contracts\HasRecordQueries;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -68,8 +69,10 @@ class File extends Model implements HasRecordQueries
             ->latestOfMany('version_number');
     }
 
-    // All versions
-    public function versions()
+    /**
+     * @return HasMany<FileVersion, $this>
+     */
+    public function versions(): HasMany
     {
         return $this->hasMany(FileVersion::class);
     }

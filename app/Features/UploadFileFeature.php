@@ -10,6 +10,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Notifications\StorageQuotaWarningNotification;
+use App\Exceptions\StorageQuotaExceededException;
 
 class UploadFileFeature
 {
@@ -25,9 +26,14 @@ class UploadFileFeature
 
         $fileSize = $uploadedFile->getSize();
 
-        // Storage quota check
-        if (($user->storage_used + $fileSize) > $user->storage_limit) {
-            throw new \Exception(__('file.quota_exceeded'));
+        // Storage quota check (active + trashed files both count toward the limit).
+        if (! $user->hasStorageFor($fileSize)) {
+            throw new StorageQuotaExceededException(
+                tier: $user->tier,
+                used: $user->storage_used,
+                limit: $user->storage_limit,
+                attempted: $fileSize,
+            );
         }
 
         return DB::transaction(function () use ($uploadedFile, $userId, $parentId, $fileSize) {
@@ -59,8 +65,9 @@ class UploadFileFeature
             
 
             $updatedUser = $this->users->findById($userId);
+            $threshold = (int) config('storage.warning_threshold', 80);
             $percent = (int) round(($updatedUser->storage_used / $updatedUser->storage_limit) * 100);
-            if ($percent >= 80) {
+            if ($percent >= $threshold) {
                 $updatedUser->notify(new StorageQuotaWarningNotification($percent));
             }
 

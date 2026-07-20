@@ -32,6 +32,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role_id',
+        'tier',
         'storage_limit',
         'storage_used',
     ];
@@ -84,6 +85,43 @@ class User extends Authenticatable
     public function hasPermission(string $permission): bool
     {
         return $this->role->permissions->contains('name', $permission);
+    }
+
+    public function isPremium(): bool
+    {
+        return $this->tier === 'premium';
+    }
+
+    public function isNormal(): bool
+    {
+        return ! $this->isPremium();
+    }
+
+    public function hasStorageFor(int $bytes): bool
+    {
+        return ($this->storage_used + $bytes) <= $this->storage_limit;
+    }
+
+    public function remainingStorage(): int
+    {
+        return max(0, $this->storage_limit - $this->storage_used);
+    }
+
+    public function usagePercent(): int
+    {
+        if ($this->storage_limit <= 0) {
+            return 100;
+        }
+
+        return (int) min(100, round($this->storage_used / $this->storage_limit * 100));
+    }
+
+    public static function upgradeToPremiumTier(int $userId): void
+    {
+        static::where('id', $userId)->update([
+            'tier'          => 'premium',
+            'storage_limit' => (int) config('storage.tiers.premium'),
+        ]);
     }
 
     public static function findByEmailAddress(string $email): ?self

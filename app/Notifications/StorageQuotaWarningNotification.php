@@ -48,9 +48,9 @@ class StorageQuotaWarningNotification extends Notification
     {
         return [
             'message'      => __('notifications.quota_warning', [
-                'percent' => $this->percentUsed,
+                'percent' => $this->percentage,
             ]),
-            'percent_used' => $this->percentUsed,
+            'percent_used' => $this->percentage,
         ];
     }
 }

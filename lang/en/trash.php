@@ -12,4 +12,5 @@ return [
     'confirm_permanent' => 'This cannot be undone. Permanently delete:',
     'files' => 'Deleted Files',
     'folders' => 'Deleted Folders',
+    'retention_locked' => 'Can be permanently deleted :time',
 ];
