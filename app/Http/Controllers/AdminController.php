@@ -58,7 +58,6 @@ class AdminController extends Controller
     public function downloadFile(User $user, File $file, DownloadFileFeature $feature)
     {
         abort_if($file->user_id !== $user->id, 404);
-        $this->authorize('view', $file);
 
         return $feature->handle($file);
     }
@@ -69,7 +68,6 @@ class AdminController extends Controller
     public function destroyFile(User $user, File $file, DeleteFileFeature $feature)
     {
         abort_if($file->user_id !== $user->id, 404);
-        $this->authorize('delete', $file);
 
         $feature->handle($file);
 
@@ -84,7 +82,6 @@ class AdminController extends Controller
     public function destroyFolder(User $user, Folder $folder, DeleteFolderFeature $feature)
     {
         abort_if($folder->user_id !== $user->id, 404);
-        $this->authorize('delete', $folder);
 
         $feature->handle($folder->id);
 

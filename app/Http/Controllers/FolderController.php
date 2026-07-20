@@ -12,13 +12,17 @@ use App\Models\Folder;
 
 class FolderController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Folder::class, 'folder');
+    }
+    
     /**
      * Store a newly created resource in storage.
      */
     public function store(CreateFolderRequest $request, CreateFolderFeature $feature)
     {
-        $this->authorize('create', Folder::class);
-        $folder = $feature->handle($request->validated(), auth()->id());
+        $feature->handle($request->validated(), auth()->id());
 
         return redirect()->back()->with('success', __('folder.created'));
     }
@@ -28,7 +32,6 @@ class FolderController extends Controller
      */
     public function update(RenameFolderRequest $request, Folder $folder, RenameFolderFeature $feature)
     {
-        $this->authorize('update', $folder);
         $feature->handle($folder->id, $request->validated()['name']);
 
         return redirect()->back()->with('success', __('folder.renamed'));
@@ -39,22 +42,20 @@ class FolderController extends Controller
      */
     public function destroy(Folder $folder, DeleteFolderFeature $feature)
     {
-        $this->authorize('delete', $folder);
         $feature->handle($folder->id);
 
         return redirect()->back()->with('success', __('folder.deleted'));
     }
 
+    public function show(Folder $folder, GetFolderContentsFeature $feature)
+    {
+        $contents = $feature->handle($folder, auth()->id());
 
-public function show(Folder $folder, GetFolderContentsFeature $feature)
-{
-    $this->authorize('view', $folder);
-    $contents = $feature->handle($folder, auth()->id());
-    return view('dashboard.index', [
-        'folders'       => $contents['folders'],
-        'files'         => $contents['files'],
-        'ancestors'     => $contents['ancestors'],
-        'currentFolder' => $folder,
-    ]);
-}
+        return view('dashboard.index', [
+            'folders'       => $contents['folders'],
+            'files'         => $contents['files'],
+            'ancestors'     => $contents['ancestors'],
+            'currentFolder' => $folder,
+        ]);
+    }
 }

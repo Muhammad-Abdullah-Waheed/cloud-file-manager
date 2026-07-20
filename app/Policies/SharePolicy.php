@@ -18,4 +18,9 @@ class SharePolicy
     {
         return $user->id === $share->receiver_id;
     }
+
+    public function create(User $user): bool
+    {
+        return $user->id === $share->sender_id;
+    }
 }

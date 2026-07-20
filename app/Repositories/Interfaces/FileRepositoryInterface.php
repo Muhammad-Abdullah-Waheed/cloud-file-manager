@@ -5,21 +5,13 @@ namespace App\Repositories\Interfaces;
 use App\Models\File;
 use Illuminate\Database\Eloquent\Collection;
 
-interface FileRepositoryInterface
+/**
+ * @extends BaseRepositoryInterface<File>
+ */
+interface FileRepositoryInterface extends BaseRepositoryInterface
 {
-    public function create(array $data): File;
-
-    public function findById(int $id): ?File;
-
+    /**
+     * @return Collection<int, File>
+     */
     public function getFilesInFolder(?int $folderId, int $userId): Collection;
-
-    public function softDelete(int $fileId): void;
-
-    public function restore(int $fileId): void;
-
-    public function rename(int $fileId, string $name): void;
-
-    public function getTrashed(int $userId): Collection;
-
-    public function permanentDelete(int $fileId): void;
 }

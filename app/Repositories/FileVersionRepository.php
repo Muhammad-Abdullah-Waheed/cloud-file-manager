@@ -10,20 +10,16 @@ class FileVersionRepository implements FileVersionRepositoryInterface
 {
     public function createVersion(array $data): FileVersion
     {
-        return FileVersion::create($data);
+        return FileVersion::storeVersion($data);
     }
 
     public function getLatestVersion(int $fileId): ?FileVersion
     {
-        return FileVersion::where('file_id', $fileId)
-            ->orderByDesc('version_number')
-            ->first();
+        return FileVersion::latestForFile($fileId);
     }
 
     public function getAllVersions(int $fileId): Collection
     {
-        return FileVersion::where('file_id', $fileId)
-            ->orderByDesc('version_number')
-            ->get();
+        return FileVersion::allForFile($fileId);
     }
 }

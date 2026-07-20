@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeleteRequestController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\FolderController;
 use App\Http\Controllers\HomeController;
@@ -12,15 +13,23 @@ use App\Http\Controllers\RegisterUserController;
 use App\Http\Controllers\ShareController;
 use App\Http\Controllers\TrashController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\DeleteRequestController;
 
+/*
+|--------------------------------------------------------------------------
+| Public Routes
+|--------------------------------------------------------------------------
+*/
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::post('/language/{locale}', [LanguageController::class, 'switch'])
     ->name('language.switch')
     ->whereIn('locale', ['en', 'ar']);
 
-// Guest only
+/*
+|--------------------------------------------------------------------------
+| Guest Routes (Authentication)
+|--------------------------------------------------------------------------
+*/
 Route::middleware('guest')->group(function () {
     Route::get('/register', [RegisterUserController::class, 'create'])->name('register');
     Route::post('/register', [RegisterUserController::class, 'store']);
@@ -28,58 +37,113 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [LoginUserController::class, 'login']);
 });
 
-// Auth only
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth')->group(function () {
-    Route::post('/logout', [LoginUserController::class, 'logout'])->name('logout');
 
+    Route::post('/logout', [LoginUserController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::post('/folders', [FolderController::class, 'store'])->name('folders.store');
-    Route::patch('/folders/{folder}', [FolderController::class, 'update'])->name('folders.update');
-    Route::delete('/folders/{folder}', [FolderController::class, 'destroy'])->name('folders.destroy');
-    Route::get('/folders/{folder}', [FolderController::class, 'show'])->name('folders.show');
+    /*
+    |----------------------------------------------------------------------
+    | Drive: Folders (partial resource)
+    |----------------------------------------------------------------------
+    */
+    Route::resource('folders', FolderController::class)
+        ->only(['store', 'show', 'update', 'destroy']);
 
-    Route::post('/files', [FileController::class, 'store'])->name('files.store');
-    Route::get('/files/{file}/download', [FileController::class, 'show'])->name('files.download');
-    Route::delete('/files/{file}', [FileController::class, 'destroy'])->name('files.destroy');
+    /*
+    |----------------------------------------------------------------------
+    | Drive: Files
+    |----------------------------------------------------------------------
+    */
+    Route::prefix('files')->name('files.')->group(function () {
+        Route::post('/', [FileController::class, 'store'])->name('store');
+        Route::get('/{file}/download', [FileController::class, 'show'])->name('download');
+        Route::delete('/{file}', [FileController::class, 'destroy'])->name('destroy');
+    });
 
-    Route::get('/trash', [TrashController::class, 'index'])->name('trash');
-    Route::patch('/trash/files/{file}/restore', [TrashController::class, 'restoreFile'])->name('trash.files.restore');
-    Route::patch('/trash/folders/{folder}/restore', [TrashController::class, 'restoreFolder'])->name('trash.folders.restore');
-    Route::delete('/trash/files/{file}', [TrashController::class, 'destroyFile'])->name('trash.files.destroy');
-    Route::delete('/trash/folders/{folder}', [TrashController::class, 'destroyFolder'])->name('trash.folders.destroy');
+    /*
+    |----------------------------------------------------------------------
+    | Trash
+    |----------------------------------------------------------------------
+    */
+    Route::prefix('trash')->name('trash.')->group(function () {
+        Route::get('/', [TrashController::class, 'index'])->name('index');
+        Route::patch('/files/{file}/restore', [TrashController::class, 'restoreFile'])
+            ->name('files.restore')
+            ->middleware('can:restore,file');
+        Route::delete('/files/{file}', [TrashController::class, 'destroyFile'])
+            ->name('files.destroy')
+            ->middleware('can:forceDelete,file');
+        Route::patch('/folders/{folder}/restore', [TrashController::class, 'restoreFolder'])
+            ->name('folders.restore')
+            ->middleware('can:restore,folder');
+        Route::delete('/folders/{folder}', [TrashController::class, 'destroyFolder'])
+            ->name('folders.destroy')
+            ->middleware('can:forceDelete,folder');
+    });
 
-    Route::get('/shared', [ShareController::class, 'index'])->name('share.index');
-    Route::post('/shared', [ShareController::class, 'store'])->name('share.store');
-    Route::patch('/share/{shared}', [ShareController::class, 'update'])->name('share.update');
-    Route::delete('/share/{shared}', [ShareController::class, 'destroy'])->name('share.destroy');
+    /*
+    |----------------------------------------------------------------------
+    | Shared Files / Folders
+    |----------------------------------------------------------------------
+    */
+    Route::prefix('shared')->name('share.')->group(function () {
+        Route::get('/', [ShareController::class, 'index'])->name('index');
+        Route::post('/', [ShareController::class, 'store'])->name('store');
+        Route::patch('/{shared}', [ShareController::class, 'update'])
+            ->name('update')
+            ->middleware('can:manage,shared');
+        Route::delete('/{shared}', [ShareController::class, 'destroy'])
+            ->name('destroy')
+            ->middleware('can:manage,shared');
+    });
 
-    // Admin & Manager panel (requires view-all-files permission)
+    /*
+    |----------------------------------------------------------------------
+    | Notifications
+    |----------------------------------------------------------------------
+    */
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::patch('/read-all', [NotificationController::class, 'markAllAsRead'])->name('readAll');
+        Route::patch('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
+    });
+
+    /*
+    |----------------------------------------------------------------------
+    | Admin & Manager Panel
+    |----------------------------------------------------------------------
+    */
     Route::middleware('permission:view-all-files')
         ->prefix('admin')
         ->name('admin.')
         ->group(function () {
-            Route::get('/users', [AdminController::class, 'index'])->name('users.index');
-            Route::get('/users/{user}', [AdminController::class, 'showUser'])->name('users.show');
-            Route::get('/users/{user}/folders/{folder}', [AdminController::class, 'showFolder'])->name('users.folders.show');
 
-            // Download: admin + manager (view-all-files)
-            Route::get('/users/{user}/files/{file}/download', [AdminController::class, 'downloadFile'])->name('users.files.download');
+            Route::prefix('users')->name('users.')->group(function () {
+                Route::get('/', [AdminController::class, 'index'])->name('index');
+                Route::get('/{user}', [AdminController::class, 'showUser'])->name('show');
+                Route::get('/{user}/folders/{folder}', [AdminController::class, 'showFolder'])->name('folders.show');
+                Route::get('/{user}/files/{file}/download', [AdminController::class, 'downloadFile'])->name('files.download');
 
-            // Delete: admin only (delete-any-file)
-            Route::delete('/users/{user}/files/{file}', [AdminController::class, 'destroyFile'])->name('users.files.destroy');
-            Route::delete('/users/{user}/folders/{folder}', [AdminController::class, 'destroyFolder'])->name('users.folders.destroy');
+                Route::middleware('permission:delete-any-file')->group(function () {
+                    Route::delete('/{user}/files/{file}', [AdminController::class, 'destroyFile'])->name('files.destroy');
+                    Route::delete('/{user}/folders/{folder}', [AdminController::class, 'destroyFolder'])->name('folders.destroy');
+                });
+            });
 
-            // Delete requests (view-all-files = manager + admin)
-            Route::get('/delete-requests', [DeleteRequestController::class, 'index'])->name('delete-requests.index');
-            Route::post('/delete-requests', [DeleteRequestController::class, 'store'])->name('delete-requests.store');
+            Route::prefix('delete-requests')->name('delete-requests.')->group(function () {
+                Route::get('/', [DeleteRequestController::class, 'index'])->name('index');
+                Route::post('/', [DeleteRequestController::class, 'store'])->name('store');
 
-            // Approve / reject (delete-any-file = admin only, enforced in controller)
-            Route::patch('/delete-requests/{deleteRequest}/approve', [DeleteRequestController::class, 'approve'])->name('delete-requests.approve');
-            Route::patch('/delete-requests/{deleteRequest}/reject', [DeleteRequestController::class, 'reject'])->name('delete-requests.reject');
+                Route::middleware('permission:delete-any-file')->group(function () {
+                    Route::patch('/{deleteRequest}/approve', [DeleteRequestController::class, 'approve'])->name('approve');
+                    Route::patch('/{deleteRequest}/reject', [DeleteRequestController::class, 'reject'])->name('reject');
+                });
+            });
         });
-
-    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
-    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
 });

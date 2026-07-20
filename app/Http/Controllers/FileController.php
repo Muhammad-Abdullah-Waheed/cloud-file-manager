@@ -11,6 +11,11 @@ use Illuminate\Http\Request;
 
 class FileController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(File::class, 'file');
+    }
+    
     /**
      * Display a listing of the resource.
      */
@@ -32,7 +37,6 @@ class FileController extends Controller
      */
     public function store(UploadFileRequest $request, UploadFileFeature $feature)
     {
-        $this->authorize('create', File::class);
         try {
             $feature->handle(
                 $request->file('file'),
@@ -51,8 +55,6 @@ class FileController extends Controller
      */
     public function show(File $file, DownloadFileFeature $feature)
     {
-        $this->authorize('view', $file);
-
         return $feature->handle($file);
     }
 
@@ -77,7 +79,6 @@ class FileController extends Controller
      */
     public function destroy(File $file, DeleteFileFeature $feature)
     {
-        $this->authorize('delete', $file);
         $feature->handle($file);
 
         return redirect()->back()->with('success', __('file.deleted'));

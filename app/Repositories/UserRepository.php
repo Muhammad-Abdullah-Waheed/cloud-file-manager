@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\User;
 use App\Repositories\Interfaces\UserRepositoryInterface;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class UserRepository implements UserRepositoryInterface
@@ -15,7 +16,7 @@ class UserRepository implements UserRepositoryInterface
 
     public function findByEmail(string $email): ?User
     {
-        return User::where('email', $email)->first();
+        return User::findByEmailAddress($email);
     }
 
     public function findById(int $id): ?User
@@ -25,28 +26,21 @@ class UserRepository implements UserRepositoryInterface
 
     public function search(?string $term, int $perPage = 20): LengthAwarePaginator
     {
-        return User::with('role')
-            ->when($term, fn ($q) => $q->where(function ($q) use ($term) {
-                $q->where('name', 'like', "%{$term}%")
-                  ->orWhere('email', 'like', "%{$term}%");
-            }))
-            ->orderBy('name')
-            ->paginate($perPage)
-            ->withQueryString();
+        return User::searchByTerm($term, $perPage);
     }
 
     public function incrementStorageUsed(int $userId, int $bytes): void
     {
-        User::where('id', $userId)->increment('storage_used', $bytes);
+        User::addStorageUsed($userId, $bytes);
     }
 
     public function decrementStorageUsed(int $userId, int $bytes): void
     {
-        User::where('id', $userId)->decrement('storage_used', $bytes);
+        User::removeStorageUsed($userId, $bytes);
     }
 
     public function getAdmins(): Collection
     {
-        return User::whereHas('role', fn ($q) => $q->where('name', 'admin'))->get();
+        return User::admins();
     }
 }

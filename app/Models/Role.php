@@ -11,6 +11,11 @@ class Role extends Model
     protected $fillable = ['name'];
     protected $with = ['permissions'];
 
+    public static function findByName(string $name): ?self
+    {
+        return static::where('name', $name)->first();
+    }
+
     /**
      * @return HasMany
      */

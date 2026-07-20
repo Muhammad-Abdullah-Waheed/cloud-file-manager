@@ -32,8 +32,6 @@ class ShareController extends Controller
 
     public function update(UpdateShareRequest $request, Shared $shared, UpdateSharePermissionFeature $feature)
     {
-        $this->authorize('manage', $shared);
-
         $feature->handle($shared->id, $request->validated()['permission']);
 
         return redirect()->back()->with('success', __('share.permission_updated'));
@@ -41,8 +39,6 @@ class ShareController extends Controller
 
     public function destroy(Shared $shared, RevokeShareFeature $feature)
     {
-        $this->authorize('manage', $shared);
-
         $feature->handle($shared->id);
 
         return redirect()->back()->with('success', __('share.revoked'));

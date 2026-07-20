@@ -10,37 +10,31 @@ class ShareRepository implements ShareRepositoryInterface
 {
     public function create(array $data): Shared
     {
-        return Shared::create($data);
+        return Shared::storeShare($data);
     }
 
     public function findShare(int $senderId, int $receiverId, string $type, int $id): ?Shared
     {
-        return Shared::where('sender_id', $senderId)
-            ->where('receiver_id', $receiverId)
-            ->where('shared_type', $type)
-            ->where('shared_id', $id)
-            ->first();
+        return Shared::findShareRecord($senderId, $receiverId, $type, $id);
     }
 
     public function getSharesForUser(int $userId): Collection
     {
-        return Shared::where('receiver_id', $userId)
-            ->with('sender')
-            ->get();
+        return Shared::forReceiver($userId);
     }
 
     public function updatePermission(int $shareId, string $permission): void
     {
-        Shared::where('id', $shareId)->update(['permission' => $permission]);
+        Shared::updatePermissionById($shareId, $permission);
     }
 
     public function revoke(int $shareId): void
     {
-        Shared::findOrFail($shareId)->delete();
+        Shared::revokeById($shareId);
     }
 
     public function findById(int $shareId): ?Shared
     {
-        return Shared::find($shareId);
+        return Shared::findRecordById($shareId);
     }
 }

@@ -5,25 +5,23 @@ namespace App\Repositories\Interfaces;
 use App\Models\Folder;
 use Illuminate\Database\Eloquent\Collection;
 
-interface FolderRepositoryInterface
+/**
+ * @extends BaseRepositoryInterface<Folder>
+ */
+interface FolderRepositoryInterface extends BaseRepositoryInterface
 {
-    public function create(array $data): Folder;
-
-    public function findById(int $id): ?Folder;
-
+    /**
+     * @return Collection<int, Folder>
+     */
     public function getRootFolders(int $userId): Collection;
 
+    /**
+     * @return Collection<int, Folder>
+     */
     public function getChildren(int $folderId): Collection;
 
-    public function rename(int $folderId, string $name): void;
-
-    public function softDelete(int $folderId): void;
-
-    public function restore(int $folderId): void;
-
-    public function getTrashed(int $userId): Collection;
-
-    public function permanentDelete(int $folderId): void;
-
+    /**
+     * @return array<int, Folder>
+     */
     public function getAncestors(Folder $folder): array;
 }

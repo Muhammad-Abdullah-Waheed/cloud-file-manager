@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('requester_id')->constrained('users')->cascadeOnDelete();
             $table->morphs('target');
-            $table->string('reason', 500);
+            $table->string('reason', 1024);
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->foreignId('actioned_by')->nullable()->constrained('users')->nullOnDelete();
             $table->dateTime('actioned_at')->nullable();

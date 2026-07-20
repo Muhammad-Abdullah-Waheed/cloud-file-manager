@@ -44,7 +44,6 @@ class DeleteRequestController extends Controller
 
     public function approve(DeleteRequest $deleteRequest, ApproveDeleteRequestFeature $feature)
     {
-        abort_unless(auth()->user()->hasPermission('delete-any-file'), 403);
         abort_unless($deleteRequest->isPending(), 422);
 
         $feature->handle($deleteRequest, auth()->user());
@@ -54,7 +53,6 @@ class DeleteRequestController extends Controller
 
     public function reject(DeleteRequest $deleteRequest, RejectDeleteRequestFeature $feature)
     {
-        abort_unless(auth()->user()->hasPermission('delete-any-file'), 403);
         abort_unless($deleteRequest->isPending(), 422);
 
         $feature->handle($deleteRequest, auth()->user());

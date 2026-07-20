@@ -9,6 +9,6 @@ class RoleRepository implements RoleRepositoryInterface
 {
     public function findByName(string $name): ?Role
     {
-        return Role::where('name', $name)->first();
+        return Role::findByName($name);
     }
 }

@@ -6,8 +6,10 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 
 /**
@@ -82,5 +84,40 @@ class User extends Authenticatable
     public function hasPermission(string $permission): bool
     {
         return $this->role->permissions->contains('name', $permission);
+    }
+
+    public static function findByEmailAddress(string $email): ?self
+    {
+        return static::where('email', $email)->first();
+    }
+
+    public static function searchByTerm(?string $term, int $perPage = 20): LengthAwarePaginator
+    {
+        return static::with('role')
+            ->when($term, fn ($q) => $q->where(function ($q) use ($term) {
+                $q->where('name', 'like', "%{$term}%")
+                  ->orWhere('email', 'like', "%{$term}%");
+            }))
+            ->orderBy('name')
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+
+    public static function addStorageUsed(int $userId, int $bytes): void
+    {
+        static::where('id', $userId)->increment('storage_used', $bytes);
+    }
+
+    public static function removeStorageUsed(int $userId, int $bytes): void
+    {
+        static::where('id', $userId)->decrement('storage_used', $bytes);
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public static function admins(): Collection
+    {
+        return static::whereHas('role', fn ($q) => $q->where('name', 'admin'))->get();
     }
 }
