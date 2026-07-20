@@ -41,4 +41,7 @@ return [
     'approve'                      => 'موافقة',
     'reject'                       => 'رفض',
     'no_delete_requests'           => 'لا توجد طلبات حذف.',
+
+    // Upgrade request keys
+    'upgrade_requests'             => 'طلبات الترقية',
 ];

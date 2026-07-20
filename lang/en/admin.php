@@ -41,4 +41,7 @@ return [
     'approve'                      => 'Approve',
     'reject'                       => 'Reject',
     'no_delete_requests'           => 'No delete requests found.',
+
+    // Upgrade request keys
+    'upgrade_requests'             => 'Upgrade Requests',
 ];
