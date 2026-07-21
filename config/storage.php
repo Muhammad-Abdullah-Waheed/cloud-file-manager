@@ -3,7 +3,7 @@
 return [
     // Storage limit per tier, in bytes.
     'tiers' => [
-        'normal'  => 5 * 1024,          // 5 KB
+        'normal'  => 500 * 1024,          // 500 KB
         'premium' => 5 * 1024 * 1024,   // 5 MB
     ],
 

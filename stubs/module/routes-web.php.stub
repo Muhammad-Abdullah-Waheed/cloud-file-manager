@@ -1,0 +1,11 @@
+<?php
+
+use {{ moduleNamespace }}\Http\Controllers\{{ module }}Controller;
+use Illuminate\Support\Facades\Route;
+
+Route::middleware(['web', 'auth'])
+    ->prefix('{{ moduleLower }}')
+    ->name('{{ moduleLower }}.')
+    ->group(function () {
+        Route::get('/', [{{ module }}Controller::class, 'index'])->name('index');
+    });

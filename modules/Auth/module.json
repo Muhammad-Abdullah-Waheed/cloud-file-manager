@@ -1,0 +1,5 @@
+{
+    "name": "Auth",
+    "namespace": "Modules\\Auth",
+    "provider": "Modules\\Auth\\Providers\\AuthServiceProvider"
+}

@@ -1,0 +1,5 @@
+{
+    "name": "Drive",
+    "namespace": "Modules\\Drive",
+    "provider": "Modules\\Drive\\Providers\\DriveServiceProvider"
+}

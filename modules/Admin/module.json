@@ -1,0 +1,5 @@
+{
+    "name": "Admin",
+    "namespace": "Modules\\Admin",
+    "provider": "Modules\\Admin\\Providers\\AdminServiceProvider"
+}

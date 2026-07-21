@@ -1,0 +1,5 @@
+{
+    "name": "Billing",
+    "namespace": "Modules\\Billing",
+    "provider": "Modules\\Billing\\Providers\\BillingServiceProvider"
+}

@@ -1,0 +1,11 @@
+<?php
+
+namespace {{ moduleNamespace }}\Features;
+
+class Example{{ module }}Feature
+{
+    public function handle(): void
+    {
+        //
+    }
+}

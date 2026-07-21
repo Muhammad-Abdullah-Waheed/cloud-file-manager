@@ -1,0 +1,53 @@
+<?php
+
+namespace {{ moduleNamespace }}\Providers;
+
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\ServiceProvider;
+
+class {{ module }}ServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        //
+    }
+
+    public function boot(): void
+    {
+        Route::middleware('web')->group(__DIR__.'/../Routes/web.php');
+        $this->loadViewsFrom(__DIR__.'/../Resources/views', '{{ moduleLower }}');
+        $this->loadMigrationsFrom(__DIR__.'/../Database/Migrations');
+        $this->loadTranslationsFrom(__DIR__.'/../lang', '{{ moduleLower }}');
+
+        $this->registerPolicies();
+        $this->registerMiddlewareAliases();
+        $this->registerRouteBindings();
+        $this->registerCommands();
+    }
+
+    protected function registerPolicies(): void
+    {
+        // Gate::policy({{ module }}::class, {{ module }}Policy::class);
+    }
+
+    protected function registerMiddlewareAliases(): void
+    {
+        $this->app['router']->aliasMiddleware(
+            '{{ moduleLower }}.access',
+            \{{ moduleNamespace }}\Http\Middleware\Ensure{{ module }}Access::class
+        );
+    }
+
+    protected function registerRouteBindings(): void
+    {
+        //
+    }
+
+    protected function registerCommands(): void
+    {
+        if ($this->app->runningInConsole()) {
+            // $this->commands([]);
+        }
+    }
+}

@@ -1,0 +1,5 @@
+{
+    "name": "{{ module }}",
+    "namespace": "{{ moduleNamespace }}",
+    "provider": "{{ moduleNamespace }}\\Providers\\{{ module }}ServiceProvider"
+}

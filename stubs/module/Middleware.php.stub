@@ -1,0 +1,15 @@
+<?php
+
+namespace {{ moduleNamespace }}\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class Ensure{{ module }}Access
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        return $next($request);
+    }
+}

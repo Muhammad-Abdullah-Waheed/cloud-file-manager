@@ -1,0 +1,5 @@
+{
+    "name": "Core",
+    "namespace": "Modules\\Core",
+    "provider": "Modules\\Core\\Providers\\CoreServiceProvider"
+}

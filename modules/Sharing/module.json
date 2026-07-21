@@ -1,0 +1,5 @@
+{
+    "name": "Sharing",
+    "namespace": "Modules\\Sharing",
+    "provider": "Modules\\Sharing\\Providers\\SharingServiceProvider"
+}

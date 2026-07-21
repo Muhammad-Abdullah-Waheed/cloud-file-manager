@@ -1,0 +1,10 @@
+<?php
+
+namespace {{ moduleNamespace }}\Repositories\Interfaces;
+
+use {{ moduleNamespace }}\Models\{{ module }};
+
+interface {{ module }}RepositoryInterface
+{
+    public function findById(int $id): ?{{ module }};
+}
